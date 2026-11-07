@@ -630,6 +630,7 @@ source = { editable = "." }
 dependencies = [
     { name = "eth-abi" },
     { name = "eth-hash", extra = ["pycryptodome"] },
+    { name = "pydantic" },
     { name = "rfc8785" },
 ]
 
@@ -643,6 +644,7 @@ dev = [
 requires-dist = [
     { name = "eth-abi", specifier = ">=5" },
     { name = "eth-hash", extras = ["pycryptodome"], specifier = ">=0.7" },
+    { name = "pydantic", specifier = ">=2.9" },
     { name = "rfc8785", specifier = ">=0.1.4" },
 ]
 
