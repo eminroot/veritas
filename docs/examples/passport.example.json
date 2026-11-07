@@ -1,0 +1,108 @@
+{
+  "format": "veritas.passport/1",
+  "project_id": "6f1c2a9e-3b7d-4e2a-9c41-8d5b2f0e7a13",
+  "version": 1,
+  "title": "New roof for the Yeni Qala village school",
+  "summary": "The school roof leaks in every classroom and two rooms are closed in winter. We replace the roof, repair the frame under it and add gutters, so all 140 pupils can use the building all year.",
+  "category": "education",
+  "charity": {
+    "legal_name": "Bərəkət İctimai Birliyi",
+    "voen": "1700000011"
+  },
+  "contractor": {
+    "legal_name": "Dağ Tikinti MMC",
+    "voen": "1300000021"
+  },
+  "officer": {
+    "name": "Nərmin Əliyeva",
+    "organisation": "Sample Audit Partners",
+    "address": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65"
+  },
+  "currency": "AZN",
+  "total_qapik": 2049000,
+  "allocation": "pro_rata",
+  "milestones": [
+    {
+      "index": 0,
+      "title": "Old roof removed and frame repaired",
+      "deliverable": "The old roof covering is gone, rotten rafters are replaced with new timber and the frame is ready for sheets.",
+      "method": "A crew of four strips the roof section by section, replaces damaged rafters and treats all timber against rot.",
+      "amount_qapik": 420000,
+      "budget": [
+        {"item": "Crew labour", "quantity": 12, "unit": "day", "unit_price_qapik": 25000, "amount_qapik": 300000},
+        {"item": "Rafter timber 50x150 mm", "quantity": 30, "unit": "piece", "unit_price_qapik": 4000, "amount_qapik": 120000}
+      ],
+      "proof": [
+        {"kind": "photo", "description": "The bare frame from each side of the building, challenge code visible", "min_count": 4},
+        {"kind": "invoice", "description": "Timber invoice from the supplier", "min_count": 1},
+        {"kind": "fiscal_receipt", "description": "e-kassa receipt for the timber", "min_count": 1}
+      ],
+      "window": {"opens": "2027-03-01", "closes": "2027-03-31"},
+      "site": {
+        "type": "Polygon",
+        "coordinates": [[[48.15, 40.79], [48.152, 40.79], [48.152, 40.7915], [48.15, 40.7915], [48.15, 40.79]]]
+      }
+    },
+    {
+      "index": 1,
+      "title": "New roof laid",
+      "deliverable": "The whole roof is covered with insulated metal sheets, with no gaps at the ridge or the edges.",
+      "method": "Insulation goes on first, then metal sheets screwed to battens, working from the eaves up to the ridge.",
+      "amount_qapik": 1383000,
+      "budget": [
+        {"item": "Metal roof sheets", "quantity": 420, "unit": "m2", "unit_price_qapik": 1800, "amount_qapik": 756000},
+        {"item": "Roof insulation", "quantity": 420, "unit": "m2", "unit_price_qapik": 600, "amount_qapik": 252000},
+        {"item": "Crew labour", "quantity": 15, "unit": "day", "unit_price_qapik": 25000, "amount_qapik": 375000}
+      ],
+      "proof": [
+        {"kind": "photo", "description": "The finished roof from each side, challenge code visible", "min_count": 4},
+        {"kind": "video", "description": "One walk around the building showing the whole roof", "min_count": 1},
+        {"kind": "invoice", "description": "Invoices for the sheets and the insulation", "min_count": 2},
+        {"kind": "fiscal_receipt", "description": "e-kassa receipts for the materials", "min_count": 2}
+      ],
+      "window": {"opens": "2027-04-01", "closes": "2027-05-15"},
+      "site": {
+        "type": "Polygon",
+        "coordinates": [[[48.15, 40.79], [48.152, 40.79], [48.152, 40.7915], [48.15, 40.7915], [48.15, 40.79]]]
+      }
+    },
+    {
+      "index": 2,
+      "title": "Gutters, inspection and handover",
+      "deliverable": "Gutters and downpipes on all four sides, an engineer's signed inspection report, and the site cleared.",
+      "method": "The contractor fits the gutters, an independent engineer inspects the roof, and the school director signs the handover.",
+      "amount_qapik": 246000,
+      "budget": [
+        {"item": "Gutters and downpipes", "quantity": 80, "unit": "m", "unit_price_qapik": 2200, "amount_qapik": 176000},
+        {"item": "Engineer inspection", "quantity": 1, "unit": "visit", "unit_price_qapik": 40000, "amount_qapik": 40000},
+        {"item": "Clean-up and waste removal", "quantity": 1, "unit": "job", "unit_price_qapik": 30000, "amount_qapik": 30000}
+      ],
+      "proof": [
+        {"kind": "photo", "description": "Gutters on each side and the cleared yard, challenge code visible", "min_count": 4},
+        {"kind": "document", "description": "Signed inspection report and handover note", "min_count": 2},
+        {"kind": "invoice", "description": "Invoice for the gutters", "min_count": 1}
+      ],
+      "window": {"opens": "2027-05-16", "closes": "2027-06-15"},
+      "site": {
+        "type": "Polygon",
+        "coordinates": [[[48.15, 40.79], [48.152, 40.79], [48.152, 40.7915], [48.15, 40.7915], [48.15, 40.79]]]
+      }
+    }
+  ],
+  "decision": {
+    "vote_window_hours": 72,
+    "min_turnout_bps": 1000,
+    "approval_bps": 5000,
+    "min_vote_qapik": 500,
+    "turnout_extension_hours": 48,
+    "low_turnout_fallback": "officer_decision"
+  },
+  "stop": {
+    "evidence_grace_days": 14,
+    "choice_window_days": 30,
+    "unclaimed": "refund"
+  },
+  "pay_on_proof": {
+    "funds": "next_milestone"
+  }
+}
