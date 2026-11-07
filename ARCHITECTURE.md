@@ -105,3 +105,82 @@ A few of these need a reason.
 **No ERC-4337.** Account abstraction is the usual way to hide gas from users. We don't need it, because donors never hold anything on-chain. Each user signs messages with a key on their phone, the relayer submits them and pays, and our contracts check the signature (EIP-712). Same experience, much less infrastructure. If stablecoin donations from abroad come later, smart wallets can come with them.
 
 **vAZN instead of MockUSDC.** The escrows count money in vAZN, an accounting token where 1 vAZN is 1 manat in the bank's escrow account. Only a bank signature can mint or burn it, and it can only move between Veritas contracts, so it can't leave the system or be traded. It keeps the books in manat and makes the escrow balance visible on the explorer. The same escrow can hold a real stablecoin later (section 6).
+
+## 4. What goes on-chain
+
+The rule: the chain stores commitments (hashes), amounts, decisions and the rules that connect them. Everything else lives in PostgreSQL and storage.
+
+| What | On-chain | Off-chain | Why it needs the chain |
+| - | - | - | - |
+| Project Passport | Hash, IPFS CID, version, milestone amounts, contractor (as a hash), decision rules | The full document | Promises can't be edited once money comes in. Changes need a donor vote. |
+| Donations | Hourly Merkle root, totals per milestone, bank signature | Who the donor is, card data, each donation row | Totals can't be inflated or quietly cut, and every donor can prove their donation is in. |
+| Escrow and release rules | Balance and state of each milestone, release conditions | Nothing | "No release without approval" is enforced by code that nobody, us included, can change. |
+| Evidence | Bundle hash, CID of the public copy, charity signature, time | The files, exact GPS, device data | Donors can prove the evidence they see is exactly what was submitted. |
+| Checks and AI review | Report hash and its pass or fail flags | The full report | The report can't be rewritten after donors vote on it. |
+| Votes | Every signed vote and the result | Who the voter is | We can't invent, drop or change votes. |
+| Officer decisions | Signed decision, hash of the reason | The reason text | Every approval has a key attached to it forever. |
+| Payouts | Release instruction, invoice hash, bank confirmation | Bank account details, the invoice file | Every manat leaving escrow matches an approved milestone. |
+| Pay-on-Proof | The approval each charge depends on | Card tokens, charge attempts | A charge with no approval behind it is provably wrong. |
+| Stop, refund, redirect | Stop decision, each donor's signed choice, moved balances | Card refunds | Money in a stopped project can't get stuck or move without the donor's say. |
+| Donation receipt | One locked token per donor per project (ERC-5192) | Who the donor is | The donor's on-chain identity for that project. Votes and choices hang off it. |
+| Reconciliation | Daily balance attestation signed by the bank | Bank statements | Releases stop by themselves when the numbers don't match. |
+
+**Off-chain on purpose:** accounts and login, KYC and KYB, card data, all personal data, the evidence files, running the AI, search, comments, notifications, the map, PDF receipts, analytics and fraud scoring. None of these get more trustworthy on a chain, and personal data must never be there.
+
+**What the chain cannot do.** It cannot see the physical world. A staged photo with a valid hash is still staged, and catching that is the job of the evidence checks, the officer and the donors. Also, in bank mode the contract does not hold the manat. It decides when money may move, and any other movement shows up at the next daily reconciliation, which freezes releases. Enforcement fully in code, with the contract holding the money, comes with stablecoin mode.
+
+## 5. Keys and roles
+
+If the relayer signed everything, the chain would only prove what Veritas said. So every party signs its own actions, and the relayer is just the courier that pays the fee.
+
+| Key | Held by | Can do |
+| - | - | - |
+| Relayer | Veritas backend, in a cloud KMS in production | Pay gas and submit transactions that carry other parties' signatures. Signs only Veritas's own claims: check reports, and the hourly donation batch when the bank can't |
+| Charity | A charity staff member's phone | Sign the Passport and evidence |
+| Officer | The Verification Officer's phone, or a Safe multisig of their organisation | Approve or reject a milestone |
+| Donor | The donor's phone, one key per project | Vote, choose a refund or a redirect |
+| Bank | The partner bank (MockBank in the demo) | Sign deposits, payouts, refunds and the daily balance, which mint and burn vAZN |
+| Admin | Safe multisig of Veritas and independent members | Register charities and officers, pause releases. Cannot move money or change a live project's rules |
+
+The donor never sees any of this. The app creates the key on first launch, keeps it in the phone's secure storage (iOS Keychain or Android Keystore, through Expo SecureStore) and uses it behind Face ID or a fingerprint. It derives a separate key for each project, so donations to different projects can't be linked on-chain. If the phone is lost, the donor proves who they are again with their phone number and card, and we submit a key rotation that waits 48 hours on-chain, during which the old key can still cancel it. Synced passkeys are a later improvement.
+
+## 6. Contracts
+
+| Contract | What it does |
+| - | - |
+| `EscrowFactory` | Creates one `MilestoneEscrow` per project as a minimal clone (EIP-1167) of a fixed implementation |
+| `PassportRegistry` | Passport hash, CID and version per project. A new version needs a passed amendment vote |
+| `MilestoneEscrow` | Milestone balances and states, release conditions, stop, refund and redirect |
+| `VotingModule` | Milestone, amendment and stop votes. Checks EIP-712 signatures, eligibility proofs, turnout and majority |
+| `DonationLedger` | Takes the hourly batch roots and credits each project's escrow |
+| `ReceiptToken` | ERC-721 locked with ERC-5192. One per donor per project, cannot be transferred |
+| `vAZN` | The manat mirror. Minted and burned only against bank signatures |
+| `BankPayoutVault` | Holds released vAZN until the bank confirms the payout or the refund |
+
+**Milestone states**
+
+1. `Funding`: taking donations
+2. `EvidenceSubmitted`: an evidence bundle is anchored
+3. `Checked`: the check report is anchored
+4. `OfficerApproved`: the officer signed off
+5. `Voting`: donors are voting
+6. `Approved`: the vote passed, or the Passport's fallback rule applied
+7. `Released`: vAZN moved to the payout vault and the bank was instructed
+8. `Paid`: the bank confirmed payment to the contractor
+
+There are two side exits. `Rejected` means the officer or the donors said no, and the charity can resubmit until a deadline. `Stopped` means the project has ended and donors choose a refund or a redirect.
+
+**Release conditions.** `release()` only goes through when all of these are true:
+
+- the milestone is `Approved`;
+- the instruction names the contractor from the current Passport and carries an invoice hash;
+- the amount fits within the milestone's budget and balance;
+- there is a balanced bank attestation from the last 36 hours;
+- releases are not paused.
+
+**Upgrades.** Live escrows can't be upgraded. A new implementation only applies to projects created after it. The admin multisig can pause releases, which stops money, but nothing it can do will move money or change a running project's rules.
+
+**Settlement adapter.** An escrow holds one ERC-20 asset and doesn't care which one.
+
+- *Bank mode, the default.* The asset is vAZN. On release the escrow sends vAZN to `BankPayoutVault`. The bank pays the contractor in manat, then signs a confirmation with its payment reference, which burns the vAZN. Total vAZN supply always equals the manat in the escrow account.
+- *Stablecoin mode, later, for donors abroad.* The asset is a real stablecoin and the escrow pays the contractor's address directly. Nothing else changes.
