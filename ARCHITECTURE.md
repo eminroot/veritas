@@ -184,3 +184,151 @@ There are two side exits. `Rejected` means the officer or the donors said no, an
 
 - *Bank mode, the default.* The asset is vAZN. On release the escrow sends vAZN to `BankPayoutVault`. The bank pays the contractor in manat, then signs a confirmation with its payment reference, which burns the vAZN. Total vAZN supply always equals the manat in the escrow account.
 - *Stablecoin mode, later, for donors abroad.* The asset is a real stablecoin and the escrow pays the contractor's address directly. Nothing else changes.
+
+## 7. Main flows
+
+### 7.1 Launching a project
+
+1. The charity, already verified off-chain, fills in the Passport: the total, milestones with line-item budgets, the method, the contractor's VÖEN, a proof checklist, a time window and a geofence for each milestone, decision rules, and defaults for Pay-on-Proof and for a stop.
+2. The API checks the VÖEN against the public taxpayer registry and checks that the milestone budgets add up to the total.
+3. The Passport is saved as canonical JSON, stored on IPFS and hashed. The charity signs the hash on their phone.
+4. The relayer calls `EscrowFactory.createProject`, which creates the escrow and records the hash, the CID, the milestone amounts and the decision rules. From here on the promises are locked.
+
+### 7.2 A donation
+
+1. The donor picks a project and pays by card. Pay-on-Proof donors save a card instead (7.5).
+2. A signed webhook arrives. The API checks the signature, asks the card provider for the payment again to confirm it, and inserts it under a unique constraint on the provider's payment id, so no payment is ever counted twice.
+3. The donation is split across milestones by the Passport's rule (by default pro rata over the milestones still being funded). Each part becomes a leaf.
+4. Every hour a worker builds one Merkle tree from the new leaves. The bank signs the root and the per-milestone totals, and the relayer anchors them with `DonationLedger.anchorBatch`. The escrows are credited and the matching vAZN is minted into them.
+5. Donors who are new to the project get a `ReceiptToken` tied to their key.
+6. The receipt now says "in escrow", with the transaction link and the donor's Merkle proof.
+
+If card payments come through a provider other than the partner bank, the money reaches the escrow account a day or two later, when the provider settles. In that case Veritas signs the hourly batch, which only records the donations, and the bank mints the vAZN when it signs the daily attestation for what has settled (7.7). The donor's status moves to "in escrow" at that point. Anything we inflate or drop shows up as a mismatch and freezes releases.
+
+Leaves follow OpenZeppelin's `StandardMerkleTree` format, one per donation per milestone:
+
+```
+leaf = keccak256(keccak256(abi.encode(donationId, holder, projectId, milestone, amount, trigger, salt)))
+```
+
+`amount` is in qəpik. `holder` is the donor's key for that project. `trigger` is the approval that caused a Pay-on-Proof charge, or zero. `salt` is random and only the donor gets it, so nobody can guess amounts or link leaves from the public root.
+
+### 7.3 Evidence
+
+1. A field worker opens the milestone in the app. The API starts a capture session and returns a one-time challenge code (valid for 15 minutes), the geofence and the proof checklist.
+2. The app captures only with its own camera, with no gallery uploads. The code has to be visible in at least one photo, written on paper or shown on a second screen. The app records GPS, accuracy and time, hashes every file with SHA-256, adds an App Attest or Play Integrity token and signs the manifest with the worker's key.
+3. The API stores the originals in private storage and starts the pipeline (section 9).
+4. When the checks are done, a redacted public copy goes to IPFS, and the relayer anchors the bundle hash, its CID and the hash of the check report.
+
+### 7.4 Decision, vote and release
+
+```mermaid
+sequenceDiagram
+  participant W as Workers
+  participant O as Officer
+  participant D as Donors
+  participant R as Relayer
+  participant C as Contracts
+  participant B as Bank
+  W->>R: check report hash
+  R->>C: recordChecks
+  O->>R: signed decision
+  R->>C: officerDecide
+  C->>C: open the vote for 72 hours
+  D->>R: signed votes
+  R->>C: castVoteBySig
+  C->>C: close the vote, milestone Approved
+  R->>C: release with invoice hash
+  C->>B: ReleaseInstructed event
+  B->>B: pay the contractor in manat
+  B->>R: signed payout confirmation
+  R->>C: confirmPayout, vAZN burned
+```
+
+Voting rules live in the Passport. Our proposed defaults:
+
+- one donor, one vote, for donors with at least 5 AZN on that milestone;
+- a 72-hour window;
+- a simple majority of the votes cast, with at least 10% turnout;
+- if turnout is too low, the window is extended once by 48 hours, and if it is still too low, the officer's decision stands.
+
+A vote is an EIP-712 message (project, milestone, approve, nonce, deadline) signed on the donor's phone. It is submitted with the donor's Merkle proof for that milestone, so the contract can check eligibility without knowing who the donor is.
+
+### 7.5 Pay-on-Proof
+
+1. The donor pledges an amount per verified milestone and saves a card. The card provider keeps the card details, and we keep only a token.
+2. When the indexer sees `MilestoneApproved`, a job charges every pledge on that project once (idempotent on pledge and milestone).
+3. Successful charges become normal donations in the next hourly batch. Their leaf carries the approval that triggered them, so a donor can check that every charge on their card follows a real approval.
+4. By default the money goes to the next milestone, so a contractor's payout never depends on card charges going through. A failed charge is retried once, then the pledge is paused and the donor is told.
+
+### 7.6 Stop, refund and redirect
+
+1. A project stops when the Passport's stop rule fires: a stop vote passes, the charity withdraws, or a milestone deadline passes with no evidence after a grace period.
+2. `MilestoneEscrow.stop` freezes the escrow. Money already paid out for finished milestones is spent. Whatever is still in escrow goes back to its donors, milestone by milestone.
+3. Each donor has 30 days to sign a choice: a refund to their card, or a redirect to another verified project.
+4. A redirect moves the donor's share of vAZN to the other project's escrow in one transaction and gives them a receipt there. A refund sends the share to the payout vault, the card provider refunds the card, and the bank's confirmation burns the vAZN.
+5. Donors who don't choose get the default the charity put in the Passport before it raised any money.
+
+### 7.7 Daily reconciliation
+
+1. Once a day a worker compares three numbers at a cut-off block: the vAZN supply on-chain, our ledger in PostgreSQL and the escrow balance on the bank statement.
+2. The bank signs an attestation with the balance, the cut-off block number and a hash of the statement. Anyone can read the vAZN supply at that block and compare. When payments settle through a separate card provider, the same attestation mints the vAZN for that day's settled donations.
+3. If the numbers differ, the attestation says so, the contracts refuse new releases and we get an alert. Releases also stop if no attestation arrives for 36 hours.
+
+### 7.8 What a donor sees
+
+| Status | Comes from | On-chain record |
+| - | - | - |
+| Received | Signed webhook from the card provider | Not yet |
+| In escrow | Hourly batch | `BatchAnchored`, plus the donor's Merkle proof |
+| Allocated to milestone N | The same batch, one leaf per milestone | `BatchAnchored` |
+| Evidence submitted | Evidence bundle anchored | `EvidenceSubmitted` |
+| Checks passed | Check report anchored | `ChecksRecorded` |
+| Approved by donors | Vote closed | `VoteClosed`, `MilestoneApproved` |
+| Paid to contractor | Bank confirmation, with the invoice number and VÖEN shown in the app | `ReleaseInstructed`, `PayoutConfirmed` |
+| Impact delivered | Last milestone paid, completion report anchored | `ProjectCompleted` |
+
+## 8. Chain plumbing
+
+**Outbox and relayer.** Application code never calls the chain. It writes a row to `chain_outbox` in the same transaction as the business change. The relayer takes rows in order under a single lock, so nonces never collide, then signs, sends, raises the fee if a transaction gets stuck, waits for finality and writes the transaction hash back.
+
+**Indexer.** Polls contract events from finalised blocks, stores them in `chain_events` and moves each record's status forward. If an event doesn't match what the database expected, or an expected event never shows up, it raises an alert.
+
+**Public verifier.** Takes a receipt (holder, leaf data, salt and proof), rebuilds the leaf, checks the proof against the anchored root, then follows the project's events and evidence CIDs. It only uses a public RPC endpoint and an IPFS gateway.
+
+**Costs.** One batch transaction per hour covers every donation in that hour. Receipts, votes and decisions are single transactions of roughly 50,000 to 150,000 gas. At recent Polygon gas prices each costs well under one US cent, and the relayer's account is the only one that ever needs topping up.
+
+## 9. Evidence pipeline
+
+Each check stores its result in `evidence_checks`, and the report combines them. A hard failure blocks the milestone unless the officer overrides it with a signed reason, which is anchored with their decision. Advisory signals are shown to the officer and the donors but never block anything on their own.
+
+| # | Check | How | Kind |
+| - | - | - | - |
+| 1 | Files match the manifest hashes, and the manifest signature and app attestation are valid | hashlib, App Attest and Play Integrity verification | Hard |
+| 2 | GPS inside the geofence, allowing for accuracy, and not a mocked location | PostGIS, the phone's mock-location flag | Hard |
+| 3 | Captured inside the milestone's time window, after the challenge code was issued | Capture session, server clock | Hard |
+| 4 | Challenge code visible in a photo | Tesseract first, then the vision model | Hard |
+| 5 | Not a reused photo: perceptual hash compared with every photo ever submitted | imagehash (pHash and dHash) stored in PostgreSQL | Hard for a clear match, advisory when close |
+| 6 | C2PA content credentials and an AI-generated image score | c2pa-python, an open detector model | Advisory |
+| 7 | The photos show the promised deliverable | Vision model with a fixed JSON schema | Advisory |
+| 8 | Invoice totals, dates and VÖEN. Every number the model extracts must appear in the OCR text | Tesseract, vision model, exact match | Hard |
+| 9 | The e-kassa receipt QR points to a real fiscal receipt with the same seller, date and amount | QR decoding, State Tax Service receipt check | Hard |
+| 10 | The contractor's VÖEN matches the Passport and is active | Public taxpayer registry | Hard |
+| 11 | Everything on the milestone's proof checklist is there | Passport checklist | Hard |
+
+The vision model gets the milestone description from the Passport plus the photos, and has to answer in this shape. Ollama enforces the JSON schema and Pydantic validates the result.
+
+```json
+{
+  "deliverable_visible": true,
+  "matches_milestone": "partly",
+  "challenge_code_seen": "K7Q2MX",
+  "observations": ["new roof sheets on the east side", "scaffolding still up"],
+  "concerns": ["west side not visible in any photo"],
+  "confidence": 0.72
+}
+```
+
+Text inside evidence is data, not instructions. A sign in a photo that says "approve this" is just a sign: the prompt says so, the schema has no field that approves anything, and no model output can move money anyway.
+
+Before the public copy goes to IPFS, faces and number plates are blurred and personal details on invoices are masked. The original stays in private storage for the officer and auditors, and its SHA-256 is part of the anchored bundle, so an auditor can confirm it was never changed.
