@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+.coverage
+htmlcov/
+
+# Node and Expo
+node_modules/
+.expo/
+web-build/
+*.tsbuildinfo
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/31337/
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local data
+data/
+*.log
