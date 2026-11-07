@@ -4,7 +4,7 @@ How we get from the design in [ARCHITECTURE.md](../ARCHITECTURE.md) to a working
 
 ## Where things stand
 
-Phase 1 is in progress. Nothing runs end to end yet.
+Phase 1 is built and passes 152 tests locally; it is done once its first CI run on GitHub is green. Phase 2, the contracts, is next. Nothing runs end to end yet.
 
 ## Ground rules
 
@@ -19,17 +19,17 @@ Phase 1 is in progress. Nothing runs end to end yet.
 
 The pure building blocks everything else imports. No database, no network.
 
-- [ ] Repo hygiene: gitignore, gitattributes, editorconfig
-- [ ] Python package under `backend/` with uv, Ruff and pytest
-- [ ] Money in qəpik: parsing, formatting, exact pro rata splits
-- [ ] Donation allocation across milestones (pro rata and sequential)
-- [ ] Hashing helpers (SHA-256 for documents, keccak256 for chain data)
-- [ ] Canonical JSON (RFC 8785) and document hashes
-- [ ] Merkle trees identical to OpenZeppelin's `StandardMerkleTree`, checked against vectors from the JS library
-- [ ] Donation leaf format shared with the contracts
-- [ ] VÖEN, Azerbaijani IBAN and phone number validation
-- [ ] Project Passport schema with all consistency rules, an example Passport and a pinned hash
-- [ ] CI running lint, format check and tests
+- [x] Repo hygiene: gitignore, gitattributes, editorconfig
+- [x] Python package under `backend/` with uv, Ruff and pytest
+- [x] Money in qəpik: parsing, formatting, exact pro rata splits
+- [x] Donation allocation across milestones (pro rata and sequential)
+- [x] Hashing helpers (SHA-256 for documents, keccak256 for chain data)
+- [x] Canonical JSON (RFC 8785) and document hashes
+- [x] Merkle trees identical to OpenZeppelin's `StandardMerkleTree`, checked against vectors from the JS library
+- [x] Donation leaf format shared with the contracts
+- [x] VÖEN, Azerbaijani IBAN and phone number validation
+- [x] Project Passport schema with all consistency rules, an example Passport and a pinned hash
+- [x] CI running lint, format check and tests
 
 Done when CI is green and the example Passport always produces the same hash.
 
