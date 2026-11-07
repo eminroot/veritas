@@ -50,8 +50,9 @@ apps/verifier    static page that checks a receipt against the chain directly
 backend/         Python: API, workers, relayer and indexer
 contracts/       Solidity contracts and Foundry tests
 infra/           Docker Compose and example environment files
+docs/            roadmap and example documents
 ```
 
 ## Status
 
-Design stage, no code yet.
+Early build. The backend foundations are in place and the contracts come next. The plan and progress are in [docs/ROADMAP.md](docs/ROADMAP.md).
