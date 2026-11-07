@@ -25,6 +25,33 @@ AI advises, humans decide, the blockchain enforces.
 
 No wallet, no gas, no crypto. The app handles all of that.
 
+## Stack
+
+| Part | Choice |
+| - | - |
+| App | Expo (React Native, TypeScript) for iOS, Android and web |
+| Backend | Python 3.12, FastAPI, SQLAlchemy, Procrastinate |
+| Database | PostgreSQL 17 with PostGIS |
+| Evidence checks | Tesseract, OpenCV, imagehash, c2pa-python |
+| AI | Ollama with local vision and text models |
+| Storage | Private S3-compatible bucket, IPFS |
+| Contracts | Solidity, OpenZeppelin, Foundry |
+| Chain | web3.py, Polygon Amoy testnet for the demo |
+
+The full design, including exactly what goes on-chain and why, is in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Repository layout
+
+Planned:
+
+```
+apps/client      Expo app for iOS, Android and web
+apps/verifier    static page that checks a receipt against the chain directly
+backend/         Python: API, workers, relayer and indexer
+contracts/       Solidity contracts and Foundry tests
+infra/           Docker Compose and example environment files
+```
+
 ## Status
 
 Design stage, no code yet.
