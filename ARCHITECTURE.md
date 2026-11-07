@@ -332,3 +332,48 @@ The vision model gets the milestone description from the Passport plus the photo
 Text inside evidence is data, not instructions. A sign in a photo that says "approve this" is just a sign: the prompt says so, the schema has no field that approves anything, and no model output can move money anyway.
 
 Before the public copy goes to IPFS, faces and number plates are blurred and personal details on invoices are masked. The original stays in private storage for the officer and auditors, and its SHA-256 is part of the anchored bundle, so an auditor can confirm it was never changed.
+
+## 10. Data model
+
+Main tables:
+
+- **People:** `users`, `devices` (public keys), `charities`, `contractors` (VÖEN, bank account), `officers`
+- **Projects:** `projects`, `passports` (versioned canonical JSON, hash, CID), `milestones`, `budget_lines`, `sites` (PostGIS geofences)
+- **Money:** `donations`, `allocations` (one per donation per milestone), `pledges`, `pledge_charges`, `receipts`, `releases`, `payouts`, `refunds`, `redirects`
+- **Evidence:** `capture_sessions`, `evidence_items`, `evidence_checks`, `check_reports`, `photo_hashes`
+- **Decisions:** `officer_decisions`, `votes`
+- **Chain:** `batches`, `batch_leaves`, `chain_outbox`, `chain_events`, `reconciliations`
+
+Money is stored as integer qəpik everywhere, never as floats.
+
+## 11. Security and privacy
+
+**Donations are real.** A donation exists only after a signed webhook, a second lookup of the payment with the card provider and an insert that is unique on the provider's payment id. The daily reconciliation catches anything that slips past.
+
+**One person, one vote.** A voter is tied to a verified phone number and a card, and needs at least 5 AZN on the milestone. Large projects can also require ASAN İmza or SİMA.
+
+**Personal data.** Nothing personal goes on-chain or to IPFS. On-chain, a donor is a per-project key with no name attached, and leaves are salted. Photos and invoices are redacted before they go public. If a donor asks to be forgotten, we delete the off-chain data, and what is left on-chain is hashes nobody can reverse.
+
+**Keys.** The relayer key lives in a cloud KMS in production and can only do courier work. Officer and admin keys can be Safe multisigs. The bank's key belongs to the bank.
+
+**App integrity.** Evidence is accepted only from the genuine app on an unmodified phone (App Attest, Play Integrity), captured inside the app, with mocked locations rejected.
+
+**Contracts.** No proxies on live escrows, unit and fuzz tests in Foundry, an outside audit before mainnet, and a pause that can stop money but never move it.
+
+**What we still trust.** The bank to report its balance honestly, the card provider to report payments honestly, and officers to do their job. Each of them signs with their own key, so if one of them lies, the lie is permanent and has their name on it.
+
+## 12. Environments
+
+- **Local:** Docker Compose with PostgreSQL and PostGIS, Kubo, Ollama, Anvil, MockBank and a mock card provider. The app runs as an Expo development build.
+- **Demo:** contracts on Polygon Amoy, explorer links to amoy.polygonscan.com, MockBank and the card provider's sandbox.
+- **Production:** Polygon PoS, keys in KMS and Safe, two IPFS pinning providers, the real partner bank and card provider.
+
+## 13. Open questions
+
+- Which bank holds the escrow account? Will it sign attestations with its own key, or only send statements? Can it also be the card acquirer?
+- Which card provider in Azerbaijan supports saved cards with merchant-initiated charges (needed for Pay-on-Proof), and how long after a payment can it still refund a card?
+- Does the State Tax Service allow automated e-kassa receipt and VÖEN checks, or do officers open those links by hand at first?
+- What do the NGO donation rules require us to collect and report about donors? This only affects the off-chain side.
+- Are 10% turnout and the officer fallback the right voting defaults, or should every Passport set its own?
+- Should a Pay-on-Proof charge fund the milestone that was just approved, or the next one?
+- Where does the virtual assets law stand now? It decides when stablecoin mode becomes possible.
