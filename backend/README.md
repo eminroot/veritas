@@ -18,3 +18,15 @@ uv run pytest
 uv run ruff check .
 uv run ruff format .
 ```
+
+## Layout
+
+```
+src/veritas/core/       money, hashing, canonical JSON, identifier checks
+src/veritas/chain/      Merkle trees and leaf formats shared with the contracts
+src/veritas/domain/     rules that don't depend on storage, such as allocation
+src/veritas/passport/   the Project Passport schema
+tests/                  pytest suite; fixtures/ holds vectors made with other tools
+```
+
+The Merkle vectors in `tests/fixtures/merkle_vectors.json` come from OpenZeppelin's JS library. `make_merkle_vectors.mjs` next to them rebuilds the file.
