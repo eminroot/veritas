@@ -1,5 +1,6 @@
 import copy
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -100,3 +101,70 @@ def test_inconsistent_passports_are_refused(doc, break_it):
     break_it(broken)
     with pytest.raises(ValidationError):
         build(broken)
+
+
+def test_decomposed_text_hashes_like_composed_text(doc):
+    # "İ" typed as I plus a combining dot, as some keyboards send it.
+    doc["charity"]["legal_name"] = doc["charity"]["legal_name"].replace("İ", "I\u0307")
+    assert "I\u0307" in doc["charity"]["legal_name"]
+    assert to_hex(build(doc).digest()) == EXAMPLE_DIGEST
+
+
+def test_line_breaks_only_in_prose(doc):
+    doc["summary"] = "First line.\r\nSecond line."
+    assert build(doc).summary == "First line.\nSecond line."
+    for field, value in (("title", "Roof\nrepair"), ("summary", "Bell \x07 here")):
+        broken = copy.deepcopy(doc)
+        broken[field] = value
+        with pytest.raises(ValidationError):
+            build(broken)
+
+
+SQUARE = [[48.15, 40.79], [48.152, 40.79], [48.152, 40.792], [48.15, 40.792], [48.15, 40.79]]
+
+
+def test_site_with_a_hole_inside(doc):
+    hole = [[48.1505, 40.7905], [48.151, 40.7905], [48.151, 40.791], [48.1505, 40.7905]]
+    first(doc)["site"]["coordinates"] = [SQUARE, hole]
+    assert len(build(doc).milestones[0].site.coordinates) == 2
+
+
+@pytest.mark.parametrize(
+    "coordinates",
+    [
+        # a bow tie: the outline crosses itself
+        [[[48.15, 40.79], [48.152, 40.792], [48.152, 40.79], [48.15, 40.792], [48.15, 40.79]]],
+        # a hole outside the outline
+        [SQUARE, [[48.16, 40.80], [48.161, 40.80], [48.161, 40.801], [48.16, 40.80]]],
+        # an edge that runs back over another one
+        [[[48.15, 40.79], [48.152, 40.79], [48.151, 40.79], [48.151, 40.792], [48.15, 40.79]]],
+    ],
+    ids=["bow tie", "hole outside", "edge doubling back"],
+)
+def test_sites_that_are_not_simple_polygons(doc, coordinates):
+    first(doc)["site"]["coordinates"] = coordinates
+    with pytest.raises(ValidationError):
+        build(doc)
+
+
+def test_windows_are_baku_days(doc):
+    passport = build(doc)
+    window = passport.milestones[0].window  # 2027-03-01 to 2027-03-31
+    assert window.opens_at() == datetime(2027, 2, 28, 20, 0, tzinfo=UTC)
+    assert window.closes_at() == datetime(2027, 3, 31, 20, 0, tzinfo=UTC)
+    assert window.contains(datetime(2027, 3, 31, 19, 59, 59, tzinfo=UTC))
+    assert not window.contains(datetime(2027, 3, 31, 20, 0, tzinfo=UTC))
+    assert not window.contains(datetime(2027, 2, 28, 19, 59, 59, tzinfo=UTC))
+    with pytest.raises(ValueError):
+        window.contains(datetime(2027, 3, 10))
+    assert passport.evidence_deadline(0) == datetime(2027, 4, 14, 20, 0, tzinfo=UTC)
+
+
+def test_a_checklist_must_fit_in_one_capture_session(doc):
+    doc["milestones"][0]["proof"] = [
+        {"kind": "photo", "description": "Each desk delivered", "min_count": 50},
+        {"kind": "photo", "description": "Each chair delivered", "min_count": 50},
+        {"kind": "invoice", "description": "The supplier's invoice", "min_count": 1},
+    ]
+    with pytest.raises(ValidationError, match="asks for 101 files"):
+        Passport.model_validate(doc)

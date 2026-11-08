@@ -42,6 +42,8 @@ def parse_canonical(data: bytes) -> Any:
         value = json.loads(data.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise CanonicalJSONError(f"not valid JSON: {exc}") from exc
+    except RecursionError:
+        raise CanonicalJSONError("not valid JSON: nested too deeply") from None
     if canonical_json(value) != data:
         raise CanonicalJSONError("document is not in canonical form")
     return value

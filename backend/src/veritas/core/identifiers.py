@@ -16,7 +16,7 @@ class IdentifierError(ValueError):
 
 _VOEN = re.compile(r"\d{10}")
 _AZ_IBAN = re.compile(r"AZ\d{2}[A-Z]{4}[A-Z0-9]{20}")
-_PHONE_JUNK = re.compile(r"[\s()\-]")
+_PHONE_JUNK = re.compile(r"[\s().\-]")
 _LOCAL_NUMBER = re.compile(r"[1-9]\d{8}")
 
 
@@ -47,7 +47,8 @@ def normalize_az_phone(value: str) -> str:
     """Return a phone number as +994 and nine digits.
 
     Accepts the ways people actually type them: "+994 50 123 45 67",
-    "050-123-45-67", "994501234567", "00994501234567", "(012) 345 67 89".
+    "050-123-45-67", "050.123.45.67", "994501234567", "00994501234567",
+    "(012) 345 67 89".
     """
     text = _PHONE_JUNK.sub("", str(value))
     if text.startswith("+994"):

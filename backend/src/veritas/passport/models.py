@@ -10,7 +10,8 @@ officer is who they claim to be is checked elsewhere, against registries.
 
 from __future__ import annotations
 
-from datetime import date
+import unicodedata
+from datetime import UTC, date, datetime, time, timedelta, timezone
 from enum import StrEnum
 from typing import Annotated, Literal
 from uuid import UUID
@@ -35,6 +36,10 @@ AZ_LATITUDE = (38.0, 42.0)
 # A site is a building, a street or a village, not a district. About 25 km.
 MAX_SITE_SPAN_DEGREES = 0.25
 
+# Azerbaijan has been on UTC+4 all year since 2016. Dates in a Passport are Baku
+# dates: a window opens at 00:00 on its first day and closes at 24:00 on its last.
+BAKU = timezone(timedelta(hours=4), "Asia/Baku")
+
 
 class PassportError(ValueError):
     """Published Passport bytes that do not hold together."""
@@ -46,12 +51,34 @@ def _address(value: str) -> str:
     return to_checksum_address(value)
 
 
+def _line(value: str) -> str:
+    """One line of text, in Unicode NFC.
+
+    The same words typed on two phones can arrive composed or decomposed ("ə" as one
+    code point or two). Canonical JSON keeps whatever it is given, so without NFC the
+    same visible Passport could have two hashes.
+    """
+    value = unicodedata.normalize("NFC", value)
+    if any(unicodedata.category(char) == "Cc" for char in value):
+        raise ValueError("control characters and line breaks are not allowed here")
+    return value
+
+
+def _prose(value: str) -> str:
+    """Paragraphs in NFC. Line breaks are fine, other control characters are not."""
+    value = unicodedata.normalize("NFC", value).replace("\r\n", "\n")
+    if any(unicodedata.category(char) == "Cc" and char != "\n" for char in value):
+        raise ValueError("control characters are not allowed, only line breaks")
+    return value
+
+
 Voen = Annotated[str, AfterValidator(normalize_voen)]
 Address = Annotated[str, AfterValidator(_address)]
 Qapik = Annotated[StrictInt, Field(ge=0, le=MAX_QAPIK)]
 PositiveQapik = Annotated[StrictInt, Field(gt=0, le=MAX_QAPIK)]
-Name = Annotated[str, Field(min_length=1, max_length=200)]
-Prose = Annotated[str, Field(min_length=1, max_length=4000)]
+Name = Annotated[str, Field(min_length=1, max_length=200), AfterValidator(_line)]
+Unit = Annotated[str, Field(min_length=1, max_length=32), AfterValidator(_line)]
+Prose = Annotated[str, Field(min_length=1, max_length=4000), AfterValidator(_prose)]
 Position = tuple[float, float]  # GeoJSON order: longitude, then latitude
 
 
@@ -94,7 +121,7 @@ class Officer(_Model):
 class BudgetLine(_Model):
     item: Name
     quantity: Annotated[StrictInt, Field(ge=1, le=10_000_000)]
-    unit: Annotated[str, Field(min_length=1, max_length=32)]
+    unit: Unit
     unit_price_qapik: Qapik
     amount_qapik: Qapik
 
@@ -112,6 +139,8 @@ class ProofItem(_Model):
 
 
 class TimeWindow(_Model):
+    """Baku dates, both days included."""
+
     opens: date
     closes: date
 
@@ -120,6 +149,67 @@ class TimeWindow(_Model):
         if self.closes < self.opens:
             raise ValueError("the window closes before it opens")
         return self
+
+    def opens_at(self) -> datetime:
+        """00:00 Baku time on the first day, in UTC."""
+        return datetime.combine(self.opens, time(), BAKU).astimezone(UTC)
+
+    def closes_at(self) -> datetime:
+        """24:00 Baku time on the last day, in UTC. The window is open before this."""
+        return datetime.combine(self.closes + timedelta(days=1), time(), BAKU).astimezone(UTC)
+
+    def contains(self, moment: datetime) -> bool:
+        if moment.tzinfo is None:
+            raise ValueError("compare aware datetimes only")
+        return self.opens_at() <= moment < self.closes_at()
+
+
+def _orientation(a: Position, b: Position, c: Position) -> int:
+    cross = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    return (cross > 0) - (cross < 0)
+
+
+def _on_segment(a: Position, b: Position, p: Position) -> bool:
+    """For a point known to be on the line through a and b: is it between them?"""
+    within_x = min(a[0], b[0]) <= p[0] <= max(a[0], b[0])
+    within_y = min(a[1], b[1]) <= p[1] <= max(a[1], b[1])
+    return within_x and within_y
+
+
+def _segments_touch(a: Position, b: Position, c: Position, d: Position) -> bool:
+    o1, o2 = _orientation(a, b, c), _orientation(a, b, d)
+    o3, o4 = _orientation(c, d, a), _orientation(c, d, b)
+    if o1 != o2 and o3 != o4:
+        return True
+    return (
+        (o1 == 0 and _on_segment(a, b, c))
+        or (o2 == 0 and _on_segment(a, b, d))
+        or (o3 == 0 and _on_segment(c, d, a))
+        or (o4 == 0 and _on_segment(c, d, b))
+    )
+
+
+def _crosses_itself(ring: list[Position]) -> bool:
+    """True if two edges that are not neighbours touch. Rings have at most 500 points."""
+    edges = list(zip(ring, ring[1:], strict=False))
+    count = len(edges)
+    for i in range(count):
+        for j in range(i + 2, count):
+            if i == 0 and j == count - 1:
+                continue  # the first and last edge meet where the ring closes
+            if _segments_touch(*edges[i], *edges[j]):
+                return True
+    return False
+
+
+def _inside_ring(point: Position, ring: list[Position]) -> bool:
+    """Even-odd rule: is the point strictly inside the ring?"""
+    x, y = point
+    inside = False
+    for (x1, y1), (x2, y2) in zip(ring, ring[1:], strict=False):
+        if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1) + x1:
+            inside = not inside
+    return inside
 
 
 class Site(_Model):
@@ -145,14 +235,24 @@ class Site(_Model):
                     raise ValueError(
                         f"({lon}, {lat}) is outside Azerbaijan, coordinates go longitude first"
                     )
+            if len(set(ring[:-1])) < 3:
+                raise ValueError("every ring needs at least three distinct corners")
+            if _crosses_itself(ring):
+                raise ValueError("a ring crosses itself, draw the outline without crossings")
         outline = self.coordinates[0]
-        if len(set(outline[:-1])) < 3:
-            raise ValueError("an outline needs at least three distinct corners")
         lons = [lon for lon, _ in outline]
         lats = [lat for _, lat in outline]
         if max(max(lons) - min(lons), max(lats) - min(lats)) > MAX_SITE_SPAN_DEGREES:
             raise ValueError("the site is too big to check, outline the actual work site")
+        for hole in self.coordinates[1:]:
+            if not all(_inside_ring(point, outline) for point in hole[:-1]):
+                raise ValueError("a hole must lie inside the outline")
         return self
+
+
+MAX_PROOF_FILES = 100
+"""The most files one capture session takes (veritas.evidence.manifest.MAX_ITEMS): a
+checklist must fit in one bundle, since check 11 looks at one bundle."""
 
 
 class Milestone(_Model):
@@ -174,6 +274,12 @@ class Milestone(_Model):
             raise ValueError("budget lines must add up to the milestone amount")
         if not any(item.kind is ProofKind.PHOTO for item in self.proof):
             raise ValueError("every milestone needs a photo, the challenge code is read from it")
+        files = sum(item.min_count for item in self.proof)
+        if files > MAX_PROOF_FILES:
+            raise ValueError(
+                f"the proof checklist asks for {files} files; one capture session holds at "
+                f"most {MAX_PROOF_FILES}, so no evidence could ever meet it"
+            )
         return self
 
 
@@ -231,6 +337,14 @@ class Passport(_Model):
 
     def milestone_amounts(self) -> list[int]:
         return [m.amount_qapik for m in self.milestones]
+
+    def evidence_deadline(self, index: int) -> datetime:
+        """When a milestone that still has no evidence lets anyone stop the project.
+
+        The end of the milestone's window plus the grace period in the stop rules.
+        """
+        window = self.milestones[index].window
+        return window.closes_at() + timedelta(days=self.stop.evidence_grace_days)
 
     def canonical_bytes(self) -> bytes:
         """The exact bytes to publish and hash."""
