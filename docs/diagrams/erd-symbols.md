@@ -4,9 +4,9 @@ From the [README](../../README.md#102-reading-the-diagrams). GitHub draws this d
 
 ```mermaid
 erDiagram
-    A ||--o{ B : "one A has zero or many B"
-    C ||--|{ D : "one C has one or many D"
-    E |o--o{ F : "an F has zero or one E"
-    G ||--o| H : "one G has zero or one H"
-    I ||..o{ J : "logical link, no foreign key"
+    A ||--o{ B : "zero or many"
+    C ||--|{ D : "one or many"
+    E |o--o{ F : "optional parent"
+    G ||--o| H : "zero or one"
+    I ||..o{ J : "logical link"
 ```

@@ -5,7 +5,7 @@ From the [README](../../README.md#104-each-area-in-full). GitHub draws this diag
 ```mermaid
 erDiagram
     chain_outbox {
-        bigint id PK "order of calls"
+        bigint id PK
         text kind
         text dedupe_key UK
         text function

@@ -3,6 +3,7 @@
 From the [README](../../README.md#6-use-case-diagram). GitHub draws this diagram from the source below: use its controls to zoom and pan. The README shows the same diagram as an image, [docs/images/diagrams/use-cases-donors.png](../images/diagrams/use-cases-donors.png).
 
 ```mermaid
+%%{init: {"flowchart": {"rankSpacing": 34, "nodeSpacing": 26}}}%%
 flowchart LR
     classDef actor fill:#FFF4D6,stroke:#B7791F,color:#3D2A00,stroke-width:1.5px
     classDef uc fill:#E8F1FF,stroke:#2B6CB0,color:#0B2545
@@ -14,13 +15,13 @@ flowchart LR
         u1(["UC1 Browse causes,<br/>projects and the map"]):::uc
         u2(["UC2 Sign up and sign in"]):::uc
         u3(["UC3 Give by card"]):::uc
-        u4(["UC4 Pledge: pay on proof"]):::uc
+        u4(["UC4 Pledge:<br/>pay on proof"]):::uc
         u5(["UC5 Track every gift"]):::uc
-        u6(["UC6 Vote on a milestone"]):::uc
+        u6(["UC6 Vote on<br/>a milestone"]):::uc
         u7(["UC7 Refund or move<br/>after a stop"]):::uc
-        u15(["UC15 Record on-chain"]):::shared
+        u15(["UC15 Record<br/>on-chain"]):::shared
     end
-    card["💳 Card provider"]:::system
+    card["💳 Card<br/>provider"]:::system
     chain["⛓️ Blockchain"]:::system
 
     donor --- u1 & u2 & u3 & u5 & u6

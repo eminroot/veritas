@@ -7,9 +7,9 @@ erDiagram
     projects {
         uuid id PK
         uuid charity_id FK
-        text status "draft ... completed"
+        text status
         text category
-        bigint total_qapik "goal"
+        bigint total_qapik
         text escrow_address
     }
     passports {
@@ -17,13 +17,13 @@ erDiagram
         uuid project_id FK
         integer version
         text status
-        bytea sha256 "locked on-chain"
-        text cid "IPFS"
+        bytea sha256
+        text cid
     }
     milestones {
         uuid id PK
         uuid project_id FK
-        integer index "0, 1, 2"
+        integer index
         bigint amount_qapik
         text status
         bigint funded_qapik
@@ -37,7 +37,7 @@ erDiagram
     sites {
         uuid id PK
         uuid milestone_id FK
-        geography geom "polygon"
+        geography geom
     }
     charities ||--o{ projects : "runs"
     projects ||--o{ passports : "versions"

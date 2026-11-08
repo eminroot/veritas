@@ -12,32 +12,28 @@ flowchart TB
 
     U["👤 Donors, organisations,<br/>officers, admins"]:::people
     F["👤 Field worker's phone"]:::people
-    subgraph SERVERS["Veritas servers"]
-        W["Web app<br/>React + TypeScript"]:::app
-        API["Veritas API<br/>FastAPI, 94 endpoints"]:::app
-        DB[("PostgreSQL 17 + PostGIS<br/>41 tables")]:::store
-        S3[("Private file storage")]:::store
-        EV["Evidence worker<br/>11 checks, redaction"]:::worker
-        JOBS["Jobs<br/>hourly batch, votes,<br/>payouts, reconciliation"]:::worker
-        RL["Relayer<br/>sends transactions"]:::worker
-        IX["Indexer<br/>reads final blocks"]:::worker
-    end
-    CARD["💳 Card provider"]:::outside
-    BANK["🏦 Partner bank"]:::outside
-    CH["⛓️ Contracts on Polygon<br/>escrow, ledger, receipts,<br/>voting, payout vault"]:::outside
-    IPFS[("IPFS<br/>public copies")]:::outside
+    W["Web app<br/>React + TypeScript"]:::app
     FB["Firebase Auth<br/>Google sign-in only"]:::outside
+    API["Veritas API<br/>FastAPI, 94 endpoints"]:::app
+    CARD["💳 Card provider"]:::outside
+    DB[("PostgreSQL 17 + PostGIS<br/>41 tables")]:::store
+    S3[("Private files")]:::store
+    WK["Workers<br/>11 evidence checks,<br/>hourly batch, votes,<br/>payouts, daily check"]:::worker
+    RI["Relayer and indexer<br/>send transactions,<br/>read final blocks"]:::worker
+    BANK["🏦 Partner bank"]:::outside
+    IPFS[("IPFS<br/>public copies")]:::outside
+    CH["⛓️ Contracts on Polygon<br/>escrow, ledger, receipts,<br/>voting, payout vault"]:::outside
 
-    U --> W --> API
+    U --> W
+    W -. "Google button" .-> FB
+    W --> API
     F --> API
-    W -.-> FB
     CARD -- "signed webhooks" --> API
     API <--> DB
     API --> S3
-    EV <--> DB
-    EV --> IPFS
-    JOBS <--> DB
-    JOBS <-->|"signed instructions<br/>and confirmations"| BANK
-    DB --> RL --> CH
-    CH --> IX --> DB
+    DB <--> WK
+    DB <--> RI
+    WK <-- "signed instructions<br/>and confirmations" --> BANK
+    WK --> IPFS
+    RI <--> CH
 ```

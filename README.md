@@ -180,50 +180,73 @@ How every number is calculated is in [section 12](#12-metrics).
 
 ## 5. The journeys, screen by screen
 
-Read each row left to right. The screenshots are the real web app on a phone (390 × 844), signed in as the demo account where a step needs an account. Click any screenshot to see it full size.
+Each journey reads from top to bottom, in the order a person goes through it. The screenshots are the real web app in a laptop browser (1120 × 800), signed in as the demo account where a step needs an account. They are shown at full width, so nothing needs zooming; click one to open it at full resolution.
 
 ### 5.1 The donor
 
-<table>
-<tr>
-<td align="center" valign="top" width="19%"><b>1 · Land</b><br><img src="docs/images/journey/donor-1-home.webp" width="128" alt="Landing page: Every manat, proven, and a Donate button"><br><sub>"Every manat, proven." One button to give, and a one-minute tour.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top" width="19%"><b>2 · Pick a cause</b><br><img src="docs/images/journey/donor-2-causes.webp" width="128" alt="Fourteen causes with how many projects each has"><br><sub>14 causes, each with its number of projects.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top" width="19%"><b>3 · Open a project</b><br><img src="docs/images/journey/donor-3-project.webp" width="128" alt="A project page with money raised, released, in escrow and donors"><br><sub>₼208,300 of ₼260,000: released, in escrow, donors, and the step it is on now.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top" width="19%"><b>4 · Read the plan</b><br><img src="docs/images/journey/donor-4-milestones.webp" width="128" alt="Milestones with their money, photos, checks and on-chain dates"><br><sub>Each milestone: its money, photos, checks passed, the on-chain date and the payment.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top" width="19%"><b>5 · Give</b><br><img src="docs/images/journey/donor-5-give.webp" width="128" alt="Donate dialog: give once or pay on proof, amounts, where the money would wait"><br><sub>Give once, or pay on proof. It says which milestone the ₼50 would wait in.</sub></td>
-</tr>
-<tr>
-<td align="center" valign="top"><b>6 · Sign up</b><br><img src="docs/images/journey/donor-6-signup.webp" width="128" alt="Sign-up page: donor or organisation, Google or email and password"><br><sub>Donor or organisation; Google, or an email and a password.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top"><b>7 · See where it is</b><br><img src="docs/images/journey/donor-7-dashboard.webp" width="128" alt="Donor dashboard: given, in escrow, released, refunded"><br><sub>Given ₼510; ₼245.50 waiting for proof, ₼235.80 paid on proof, ₼28.70 refunded.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top"><b>8 · Follow each project</b><br><img src="docs/images/journey/donor-8-supported.webp" width="128" alt="List of supported projects with progress bars"><br><sub>For each project: released, in escrow and still needed.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top"><b>9 · Track each gift</b><br><img src="docs/images/journey/donor-9-donations.webp" width="128" alt="My donations: each gift split into released, in escrow and refunded, with its transaction"><br><sub>Every gift split into released, in escrow and refunded, with its transaction.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top"><b>10 · See the country</b><br><img src="docs/images/journey/donor-10-map.webp" width="128" alt="Map of Azerbaijan's economic regions shaded by donations"><br><sub>Giving by region: 6,278 gifts in 30 days, ₼323,090.</sub></td>
-</tr>
-</table>
+**1 Land ➜ 2 Pick a cause ➜ 3 Open a project ➜ 4 Read the plan ➜ 5 Give ➜ 6 Sign up ➜ 7 See where the money is ➜ 8 Follow each project ➜ 9 Track each gift ➜ 10 See the country**
+
+**1 · Land.** The landing page: "Every manat, proven." One button to give, and a one-minute tour of how the money moves.
+
+<p align="center"><img src="docs/images/journey/donor-1-home.webp" width="846" alt="Landing page: Every manat, proven, with a Donate button and a one-minute tour"></p>
+
+**2 · Pick a cause.** Fourteen causes, each with its number of projects.
+
+<p align="center"><img src="docs/images/journey/donor-2-causes.webp" width="846" alt="Fourteen causes, each with its number of projects"></p>
+
+**3 · Open a project.** *Homes for 20 families returning to Ağdam*: ₼208,300 raised of ₼260,000, how much is released and how much waits in escrow, the number of donors, and the milestone it is on now.
+
+<p align="center"><img src="docs/images/journey/donor-3-project.webp" width="846" alt="Project page: money raised against the goal, released, in escrow, donors and the current milestone"></p>
+
+**4 · Read the plan.** Every milestone with its money, its photos from the site, the checks it passed, the day it was recorded on-chain and the day it was paid.
+
+<p align="center"><img src="docs/images/journey/donor-4-milestones.webp" width="846" alt="Milestones with their money, photos, checks passed, on-chain date and payment date"></p>
+
+**5 · Give.** Give once, or pay on proof. The dialog says which milestone the ₼50 would wait in.
+
+<p align="center"><img src="docs/images/journey/donor-5-give.webp" width="846" alt="Donate dialog: give once or pay on proof, amounts, and the milestone the money would wait in"></p>
+
+**6 · Sign up.** As a donor or as an organisation, with Google or with an email and a password.
+
+<p align="center"><img src="docs/images/journey/donor-6-signup.webp" width="846" alt="Sign-up page: donor or organisation, Google or an email and a password"></p>
+
+**7 · See where the money is.** The donor's dashboard: ₼510 given across 11 projects; ₼245.50 waiting for proof, ₼235.80 paid to the builders on proof, ₼28.70 refunded from stopped projects.
+
+<p align="center"><img src="docs/images/journey/donor-7-dashboard.webp" width="846" alt="Donor dashboard: given, in escrow, released and refunded"></p>
+
+**8 · Follow each project.** For each project: released (dark), in escrow (green) and still needed (grey), beside the latest news from the sites.
+
+<p align="center"><img src="docs/images/journey/donor-8-supported.webp" width="846" alt="Projects the donor supports, with released, in escrow and still needed, next to the latest news"></p>
+
+**9 · Track each gift.** Every gift with its date, card and transaction, split into given, released and in escrow, with its status.
+
+<p align="center"><img src="docs/images/journey/donor-9-donations.webp" width="846" alt="My donations: each gift with its date, card and transaction, split into given, released and in escrow"></p>
+
+**10 · See the country.** Giving by region on the map of Azerbaijan's economic regions: 6,278 gifts and ₼323,090 in the last 30 days.
+
+<p align="center"><img src="docs/images/journey/donor-10-map.webp" width="846" alt="Map of Azerbaijan's economic regions shaded by donations, with a ranking of regions"></p>
 
 ### 5.2 The organisation
 
-<table>
-<tr>
-<td align="center" valign="top" width="19%"><b>1 · Sign up</b><br><img src="docs/images/journey/org-1-signup.webp" width="128" alt="Sign-up page with I represent an organisation selected"><br><sub>"I represent an organisation": the person first, the organisation next.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top" width="19%"><b>2 · Apply</b><br><img src="docs/images/journey/org-2-apply.webp" width="128" alt="Organisation form: registered name, VÖEN, legal form, address"><br><sub>Three steps: the organisation (name, VÖEN, legal form), its people, its documents.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top" width="19%"><b>3 · Get verified</b><br><img src="docs/images/journey/org-3-status.webp" width="128" alt="Verification status: details, documents, Veritas review, verified"><br><sub>A Veritas admin checks the papers. Status: under review.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top" width="19%"><b>4 · Plan projects</b><br><img src="docs/images/journey/org-4-projects.webp" width="128" alt="Projects page: projects can be published once verified"><br><sub>Projects open once the organisation is verified.</sub></td>
-<td align="center">➜</td>
-<td align="center" valign="top" width="19%"><b>5 · Then</b><br><br><sub><b>Publish the Passport</b>, capture evidence on site, sign it, and get paid on approval: these run through the API today (section 5.3); their screens come next.</sub></td>
-</tr>
-</table>
+**1 Sign up ➜ 2 Apply ➜ 3 Get verified ➜ 4 Plan projects ➜ 5 Publish and get paid**
+
+**1 · Sign up.** "I represent an organisation": the person's own account first, the organisation's details next.
+
+<p align="center"><img src="docs/images/journey/org-1-signup.webp" width="846" alt="Sign-up page with I represent an organisation selected"></p>
+
+**2 · Apply.** Four steps: the organisation (registered name, VÖEN, legal form, address), its people, its documents, then sending it for review.
+
+<p align="center"><img src="docs/images/journey/org-2-apply.webp" width="846" alt="Organisation form: registered name, VÖEN, legal form, address and website, in four steps"></p>
+
+**3 · Get verified.** A Veritas admin checks the details and the documents, which only Veritas's reviewers can see. The status here: under review.
+
+<p align="center"><img src="docs/images/journey/org-3-status.webp" width="846" alt="Verification status: details and documents done, Veritas review in progress"></p>
+
+**4 · Plan projects.** Projects can be published once the organisation is verified; the page lists what each project needs.
+
+<p align="center"><img src="docs/images/journey/org-4-projects.webp" width="846" alt="Projects page: projects can be published once the organisation is verified"></p>
+
+**5 · Then.** Publishing the Passport, capturing evidence on site, signing it and getting paid on approval run through the API today, as section 5.3 shows; their screens come next.
 
 ### 5.3 Behind the screens: one gift, start to finish
 
@@ -296,7 +319,9 @@ Who can do what: people in amber, the systems Veritas works with in purple, and 
 
 ## 7. Architecture
 
-<p align="center"><a href="docs/diagrams/architecture.md"><img src="docs/images/diagrams/architecture.png" width="846" alt="Architecture: web app and API, PostgreSQL, evidence worker, jobs, relayer and indexer, contracts on Polygon, card provider, bank, IPFS and Firebase"></a></p>
+<p align="center"><a href="docs/diagrams/architecture.md"><img src="docs/images/diagrams/architecture.png" width="799" alt="Architecture: web app and API, PostgreSQL, private files, workers, relayer and indexer, contracts on Polygon, card provider, bank, IPFS and Firebase"></a></p>
+
+Colours: amber are people, blue the Veritas apps, green Veritas's background workers, grey its storage, purple the services outside Veritas.
 
 | Part | Where | What it does |
 |---|---|---|
@@ -401,7 +426,7 @@ The app database is where Veritas **writes**. It is normalised (third normal for
 
 The diagrams use **crow's foot** notation. Each end of a line says how many rows can be on that side.
 
-<p align="center"><a href="docs/diagrams/erd-symbols.md"><img src="docs/images/diagrams/erd-symbols.png" width="846" alt="Crow's foot symbols: exactly one, zero or one, zero or many, one or many, and a logical link"></a></p>
+<p align="center"><a href="docs/diagrams/erd-symbols.md"><img src="docs/images/diagrams/erd-symbols.png" width="846" alt="Crow's foot symbols: zero or many, one or many, an optional parent, zero or one, and a logical link"></a></p>
 
 | Symbol at a line's end | Meaning |
 |---|---|
@@ -423,25 +448,37 @@ The 41 tables fall into five areas. This map shows the areas and the keys that j
 
 ### 10.4 Each area in full
 
-**Accounts and organisations** (11 tables)
+**Accounts and organisations** (11 tables). *People, and how they sign in:*
 
-<p align="center"><a href="docs/diagrams/erd-accounts.md"><img src="docs/images/diagrams/erd-accounts.png" width="846" alt="Entity relationship diagram: users, sessions, devices, charities, members, contractors, officers and documents"></a></p>
+<p align="center"><a href="docs/diagrams/erd-people.md"><img src="docs/images/diagrams/erd-people.png" width="825" alt="Entity relationship diagram: users, sessions, password resets, login codes, devices and device challenges"></a></p>
+
+*Organisations, and who checks them* (`users` is the table above; `device_challenges.charity_id` also points to `charities`):
+
+<p align="center"><a href="docs/diagrams/erd-organisations.md"><img src="docs/images/diagrams/erd-organisations.png" width="740" alt="Entity relationship diagram: charities, charity members, contractors, officers and documents"></a></p>
 
 **Projects and their promises** (5 tables)
 
-<p align="center"><a href="docs/diagrams/erd-projects.md"><img src="docs/images/diagrams/erd-projects.png" width="696" alt="Entity relationship diagram: projects, passports, milestones, budget lines and sites"></a></p>
+<p align="center"><a href="docs/diagrams/erd-projects.md"><img src="docs/images/diagrams/erd-projects.png" width="622" alt="Entity relationship diagram: projects, passports, milestones, budget lines and sites"></a></p>
 
-**Money** (11 tables)
+**Money** (11 tables). *Money in:*
 
-<p align="center"><a href="docs/diagrams/erd-money.md"><img src="docs/images/diagrams/erd-money.png" width="846" alt="Entity relationship diagram: donations, allocations, batches, receipts, pledges, releases, payouts, claims and reconciliations"></a></p>
+<p align="center"><a href="docs/diagrams/erd-money-in.md"><img src="docs/images/diagrams/erd-money-in.png" width="500" alt="Entity relationship diagram: donations, allocations, batches, batch leaves, receipts, pledges and pledge charges"></a></p>
 
-**Evidence and decisions** (9 tables)
+*Money out, and the daily check* (`projects` is drawn in the area above):
 
-<p align="center"><a href="docs/diagrams/erd-evidence.md"><img src="docs/images/diagrams/erd-evidence.png" width="846" alt="Entity relationship diagram: capture sessions, evidence items, photo hashes, bundles, checks, reports, decisions, ballots and votes"></a></p>
+<p align="center"><a href="docs/diagrams/erd-money-out.md"><img src="docs/images/diagrams/erd-money-out.png" width="766" alt="Entity relationship diagram: releases, payouts, claims and reconciliations"></a></p>
+
+**Evidence and decisions** (9 tables). *Evidence:*
+
+<p align="center"><a href="docs/diagrams/erd-evidence.md"><img src="docs/images/diagrams/erd-evidence.png" width="761" alt="Entity relationship diagram: capture sessions, evidence items, photo hashes, bundles, checks and reports"></a></p>
+
+*Decisions* (`milestones` and `officers` are drawn in the areas above):
+
+<p align="center"><a href="docs/diagrams/erd-decisions.md"><img src="docs/images/diagrams/erd-decisions.png" width="545" alt="Entity relationship diagram: officer decisions, ballots and votes"></a></p>
 
 **Talking to the blockchain** (5 tables)
 
-<p align="center"><a href="docs/diagrams/erd-chain.md"><img src="docs/images/diagrams/erd-chain.png" width="840" alt="Entity relationship diagram: chain outbox, chain events, contracts, cursor and alerts"></a></p>
+<p align="center"><a href="docs/diagrams/erd-chain.md"><img src="docs/images/diagrams/erd-chain.png" width="846" alt="Entity relationship diagram: chain outbox, chain events, contracts, cursor and alerts"></a></p>
 
 Twelve tables point to `chain_outbox` through an optional `outbox_id` (or `submit_outbox_id`, `checks_outbox_id`, `close_outbox_id`): the call that records that row on-chain. Those lines are left out above so the diagrams stay readable; every one is zero-or-one to `chain_outbox`.
 
@@ -1280,13 +1317,23 @@ The repetition in a star costs a few kilobytes here, and the app database stays 
 
 Five fact tables (events) share four dimension tables (descriptions). Kimball calls this a **constellation**: each fact with its dimensions is one star, and the shared dimensions are **conformed**, meaning `dim_project` means the same thing to every fact.
 
-**Money: what came in, what went out, what came back.** The four dimensions are drawn here with all their columns.
+Dimensions are drawn with their keys and main columns, so the diagrams stay readable; every column of every table is in the dictionary in 11.7.
 
-<p align="center"><a href="docs/diagrams/star-money.md"><img src="docs/images/diagrams/star-money.png" width="846" alt="Star schema: fact_donation, fact_release and fact_claim with dim_date, dim_donor, dim_project and dim_milestone"></a></p>
+**Money in.**
 
-**Proof and decisions.** The same dimensions, shared (conformed), drawn as names only.
+<p align="center"><a href="docs/diagrams/star-donation.md"><img src="docs/images/diagrams/star-donation.png" width="846" alt="Star schema: fact_donation with dim_date, dim_donor, dim_project and dim_milestone"></a></p>
 
-<p align="center"><a href="docs/diagrams/star-proof.md"><img src="docs/images/diagrams/star-proof.png" width="755" alt="Star schema: fact_evidence_check and fact_ballot with the shared dimensions"></a></p>
+**Money back after a stop.** `dim_project` plays two roles here: the stopped project and the target project.
+
+<p align="center"><a href="docs/diagrams/star-claim.md"><img src="docs/images/diagrams/star-claim.png" width="770" alt="Star schema: fact_claim with dim_date, dim_donor and dim_project in two roles"></a></p>
+
+**Money out.** `dim_date` plays two roles here: the day released and the day paid.
+
+<p align="center"><a href="docs/diagrams/star-money-out.md"><img src="docs/images/diagrams/star-money-out.png" width="793" alt="Star schema: fact_release with dim_date in two roles, dim_project and dim_milestone"></a></p>
+
+**Proof and decisions.** The same dimensions, shared (conformed).
+
+<p align="center"><a href="docs/diagrams/star-proof.md"><img src="docs/images/diagrams/star-proof.png" width="846" alt="Star schema: fact_evidence_check and fact_ballot with dim_date, dim_project and dim_milestone"></a></p>
 
 ### 11.4 Reading it
 

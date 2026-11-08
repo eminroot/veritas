@@ -4,6 +4,24 @@ From the [README](../../README.md#113-entity-relationship-diagram). GitHub draws
 
 ```mermaid
 erDiagram
+    dim_date {
+        integer date_key PK
+        date full_date UK
+        text month_name
+    }
+    dim_project {
+        integer project_key PK
+        uuid project_id UK
+        text title
+        text cause_name
+        text region_name
+    }
+    dim_milestone {
+        integer milestone_key PK
+        uuid milestone_id UK
+        smallint milestone_number
+        text status
+    }
     fact_evidence_check {
         uuid bundle_id PK
         smallint check_number PK

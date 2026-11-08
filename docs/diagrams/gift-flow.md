@@ -12,19 +12,19 @@ flowchart LR
         direction TB
         A["👤 Aysel gives ₼50"]:::person --> B["1 · Card payment<br/>signed webhook"]:::step
         B --> C["2 · Split by milestone<br/>one Merkle leaf each"]:::step
-        C --> D["3 · Hourly batch<br/>bank signs, chain anchors"]:::money
+        C --> D["3 · Hourly batch<br/>bank signs,<br/>chain anchors"]:::money
         D --> E["4 · In escrow<br/>receipt token"]:::money
     end
     subgraph PROOF["Proof and decision"]
         direction TB
-        F["5 · Evidence on site<br/>GPS, time, one-time code"]:::step --> G["6 · 11 checks<br/>report hash on-chain"]:::step
+        F["5 · Evidence on site<br/>GPS, time,<br/>one-time code"]:::step --> G["6 · 11 checks<br/>report hash on-chain"]:::step
         G --> H["7 · Officer signs<br/>approve or reject"]:::step
         H --> I["8 · Donors vote<br/>72 hours"]:::step
     end
     subgraph OUT["Money out"]
         direction TB
         J["9 · Release<br/>to the payout vault"]:::money --> K["10 · Bank pays<br/>the contractor"]:::money
-        K --> L["11 · Daily check<br/>bank = chain = ledger"]:::step
+        K --> L["11 · Daily check<br/>bank = chain<br/>= ledger"]:::step
     end
     IN --> PROOF --> OUT
 ```
