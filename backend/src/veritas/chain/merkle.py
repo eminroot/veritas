@@ -113,7 +113,15 @@ def _value_from_json(abi_type: str, value: Any) -> Any:
     if abi_type.startswith("bytes"):
         if not isinstance(value, str) or not value.startswith("0x"):
             raise MerkleError(f"expected 0x hex for {abi_type}, got {value!r}")
-        return bytes.fromhex(value[2:])
+        try:
+            data = bytes.fromhex(value[2:])
+        except ValueError as exc:
+            raise MerkleError(f"not hex: {value!r}") from exc
+        size = abi_type.removeprefix("bytes")
+        if size and len(data) != int(size):
+            # eth_abi would quietly pad a short value, giving a different leaf.
+            raise MerkleError(f"{abi_type} needs {size} bytes, got {len(data)}")
+        return data
     raise MerkleError(f"type {abi_type} is not supported in dumps")
 
 

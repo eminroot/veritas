@@ -40,11 +40,18 @@ def test_parse_int_and_decimal():
 
 @pytest.mark.parametrize(
     "bad",
-    ["12.345", "-1", "abc", "", "1,250.00", "12.", ".5", "1e3", "12 50 50.5.5"],
+    ["12.345", "-1", "abc", "", "1,250.00", "12.", ".5", "1e3", "12 50 50.5.5", "1.250,50"],
 )
 def test_parse_rejects_bad_text(bad):
     with pytest.raises(MoneyError):
         parse_azn(bad)
+
+
+@pytest.mark.parametrize("typed", ["12 50", "1 25", "1234 567", "1 2500", "12 50.00"])
+def test_spaces_only_group_in_threes(typed):
+    # "12 50" might mean 12.50 or 1250. Guessing wrong is a 100x error, so refuse.
+    with pytest.raises(MoneyError):
+        parse_azn(typed)
 
 
 @pytest.mark.parametrize("bad", [12.5, True, Decimal("NaN"), Decimal("1.234"), -3, None])

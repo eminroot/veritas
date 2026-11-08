@@ -17,7 +17,11 @@ QAPIK_PER_AZN = 100
 # (below 2**53) and inside a uint64 on-chain.
 MAX_QAPIK = 10**15
 
-_AMOUNT = re.compile(r"(\d{1,14})(?:[.,](\d{1,2}))?")
+# Whole manat either as plain digits or grouped in threes with spaces ("1 250"), then
+# an optional decimal part. Grouping must be exact: "12 50" is refused, because
+# someone who types it may well mean 12.50 and reading it as 1250 is a 100x error.
+_AMOUNT = re.compile(r"(\d{1,3}(?: \d{3})+|\d{1,14})(?:[.,](\d{1,2}))?")
+_SPACES = re.compile(r"\s+")
 
 
 class MoneyError(ValueError):
@@ -39,8 +43,9 @@ def parse_azn(value: str | int | Decimal) -> int:
     """Turn a manat amount into qəpik.
 
     Accepts "12", "12.5", "12,50", "1 250.00", "12.50 AZN" and "₼12", a whole number
-    of manat as an int, or a Decimal. Rejects negatives, more than two decimals,
-    thousands separators other than spaces, and floats.
+    of manat as an int, or a Decimal. Spaces of any kind (the no-break space phones
+    insert included) may only group the manat in threes. Rejects negatives, more
+    than two decimals, any other thousands separator, and floats.
     """
     if isinstance(value, bool):
         raise MoneyError("booleans are not amounts")
@@ -56,13 +61,12 @@ def parse_azn(value: str | int | Decimal) -> int:
             raise MoneyError(f"more than two decimals: {value}")
         return check_qapik(int(scaled))
     if isinstance(value, str):
-        text = value.strip().upper().removesuffix("AZN").strip()
-        text = text.removeprefix("₼").removesuffix("₼")
-        text = text.replace(" ", "").replace(" ", "")
+        text = _SPACES.sub(" ", value).strip().upper().removesuffix("AZN").strip()
+        text = text.removeprefix("₼").removesuffix("₼").strip()
         match = _AMOUNT.fullmatch(text)
         if not match:
             raise MoneyError(f"not a manat amount: {value!r}")
-        whole, fraction = match.group(1), match.group(2) or "0"
+        whole, fraction = match.group(1).replace(" ", ""), match.group(2) or "0"
         return check_qapik(int(whole) * QAPIK_PER_AZN + int(fraction.ljust(2, "0")))
     raise MoneyError(f"unsupported type for money: {type(value).__name__}")
 

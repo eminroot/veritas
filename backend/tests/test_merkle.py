@@ -156,3 +156,34 @@ def test_fresh_leaves_get_random_salts():
     assert a.hash() != b.hash()
     assert len(DONATION_LEAF_TYPES) == len(a.values())
     assert from_hex(to_hex(a.hash())) == a.hash()
+
+
+def test_load_rejects_bytes_of_the_wrong_size():
+    dump = copy.deepcopy(vector("donations-4")["dump"])
+    dump["values"][0]["value"][6] = "0x" + "ab" * 31  # a bytes32 salt one byte short
+    with pytest.raises(MerkleError):
+        StandardMerkleTree.load(dump)
+    dump["values"][0]["value"][6] = "0xzz"
+    with pytest.raises(MerkleError):
+        StandardMerkleTree.load(dump)
+
+
+def test_donation_leaf_wants_real_types():
+    base = js_donation(2)
+    for bad in (
+        {"donation_id": str(base.donation_id)},
+        {"project_id": base.project_id.bytes},
+        {"holder": None},
+        {"milestone": True},
+        {"milestone": "1"},
+        {"trigger": "0x" + "00" * 32},
+    ):
+        fields = {
+            "donation_id": base.donation_id,
+            "holder": base.holder,
+            "project_id": base.project_id,
+            "milestone": 1,
+            "amount": 100,
+        } | bad
+        with pytest.raises(ValueError):
+            DonationLeaf(**fields)

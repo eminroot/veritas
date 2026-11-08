@@ -49,13 +49,19 @@ class DonationLeaf:
     salt: bytes = field(default_factory=new_salt)
 
     def __post_init__(self) -> None:
-        if not is_address(self.holder):
+        if not isinstance(self.donation_id, UUID) or not isinstance(self.project_id, UUID):
+            raise ValueError("donation_id and project_id must be UUIDs")
+        if not isinstance(self.holder, str) or not is_address(self.holder):
             raise ValueError(f"holder is not an address: {self.holder!r}")
         object.__setattr__(self, "holder", to_checksum_address(self.holder))
+        if isinstance(self.milestone, bool) or not isinstance(self.milestone, int):
+            raise ValueError("milestone must be an int")
         if not 0 <= self.milestone < MAX_MILESTONES:
             raise ValueError(f"milestone index out of range: {self.milestone}")
         if check_qapik(self.amount) == 0:
             raise ValueError("a leaf never carries zero qəpik")
+        if not isinstance(self.trigger, bytes) or not isinstance(self.salt, bytes):
+            raise ValueError("trigger and salt must be bytes")
         if len(self.trigger) != 32 or len(self.salt) != 32:
             raise ValueError("trigger and salt are 32 bytes each")
 
