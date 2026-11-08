@@ -1498,7 +1498,7 @@ Row 0 of each dimension, and what it stands for:
 | `<thing>_count` | A count, added up across rows. |
 | `is_<state>` | Yes/no flag (boolean). |
 | `days_<from>_to_<to>` | A duration in days, with one decimal. |
-| `pk_`, `fk_`, `uq_`, `ck_`, `ix_` | Constraint and index names: pk_<table>, fk_<table>_<column>, uq_<table>_<column>, ck_<table>_<rule>, ix_<table>_<column>. |
+| `pk_`, `fk_`, `uq_`, `ck_`, `ix_` | Constraint and index names: pk_&lt;table&gt;, fk_&lt;table&gt;_&lt;column&gt;, uq_&lt;table&gt;_&lt;column&gt;, ck_&lt;table&gt;_&lt;rule&gt;, ix_&lt;table&gt;_&lt;column&gt;. |
 | row 0 | Every dimension has a row with key 0 for 'none': the guest donor, no target project, the whole project, a date that has not happened yet. Fact keys are therefore never empty. |
 
 ### 11.9 Comments and the metafile
