@@ -190,37 +190,55 @@ Each journey reads from top to bottom, in the order a person goes through it. Th
 
 <p align="center"><img src="docs/images/journey/donor-1-home.webp" width="846" alt="Landing page: Every manat, proven, with a Donate button and a one-minute tour"></p>
 
+<p align="center">⬇️</p>
+
 **2 · Pick a cause.** Fourteen causes, each with its number of projects.
 
 <p align="center"><img src="docs/images/journey/donor-2-causes.webp" width="846" alt="Fourteen causes, each with its number of projects"></p>
+
+<p align="center">⬇️</p>
 
 **3 · Open a project.** *Homes for 20 families returning to Ağdam*: ₼208,300 raised of ₼260,000, how much is released and how much waits in escrow, the number of donors, and the milestone it is on now.
 
 <p align="center"><img src="docs/images/journey/donor-3-project.webp" width="846" alt="Project page: money raised against the goal, released, in escrow, donors and the current milestone"></p>
 
+<p align="center">⬇️</p>
+
 **4 · Read the plan.** Every milestone with its money, its photos from the site, the checks it passed, the day it was recorded on-chain and the day it was paid.
 
 <p align="center"><img src="docs/images/journey/donor-4-milestones.webp" width="846" alt="Milestones with their money, photos, checks passed, on-chain date and payment date"></p>
+
+<p align="center">⬇️</p>
 
 **5 · Give.** Give once, or pay on proof. The dialog says which milestone the ₼50 would wait in.
 
 <p align="center"><img src="docs/images/journey/donor-5-give.webp" width="846" alt="Donate dialog: give once or pay on proof, amounts, and the milestone the money would wait in"></p>
 
+<p align="center">⬇️</p>
+
 **6 · Sign up.** As a donor or as an organisation, with Google or with an email and a password.
 
 <p align="center"><img src="docs/images/journey/donor-6-signup.webp" width="846" alt="Sign-up page: donor or organisation, Google or an email and a password"></p>
+
+<p align="center">⬇️</p>
 
 **7 · See where the money is.** The donor's dashboard: ₼510 given across 11 projects; ₼245.50 waiting for proof, ₼235.80 paid to the builders on proof, ₼28.70 refunded from stopped projects.
 
 <p align="center"><img src="docs/images/journey/donor-7-dashboard.webp" width="846" alt="Donor dashboard: given, in escrow, released and refunded"></p>
 
+<p align="center">⬇️</p>
+
 **8 · Follow each project.** For each project: released (dark), in escrow (green) and still needed (grey), beside the latest news from the sites.
 
 <p align="center"><img src="docs/images/journey/donor-8-supported.webp" width="846" alt="Projects the donor supports, with released, in escrow and still needed, next to the latest news"></p>
 
+<p align="center">⬇️</p>
+
 **9 · Track each gift.** Every gift with its date, card and transaction, split into given, released and in escrow, with its status.
 
 <p align="center"><img src="docs/images/journey/donor-9-donations.webp" width="846" alt="My donations: each gift with its date, card and transaction, split into given, released and in escrow"></p>
+
+<p align="center">⬇️</p>
 
 **10 · See the country.** Giving by region on the map of Azerbaijan's economic regions: 6,278 gifts and ₼323,090 in the last 30 days.
 
@@ -234,17 +252,25 @@ Each journey reads from top to bottom, in the order a person goes through it. Th
 
 <p align="center"><img src="docs/images/journey/org-1-signup.webp" width="846" alt="Sign-up page with I represent an organisation selected"></p>
 
+<p align="center">⬇️</p>
+
 **2 · Apply.** Four steps: the organisation (registered name, VÖEN, legal form, address), its people, its documents, then sending it for review.
 
 <p align="center"><img src="docs/images/journey/org-2-apply.webp" width="846" alt="Organisation form: registered name, VÖEN, legal form, address and website, in four steps"></p>
+
+<p align="center">⬇️</p>
 
 **3 · Get verified.** A Veritas admin checks the details and the documents, which only Veritas's reviewers can see. The status here: under review.
 
 <p align="center"><img src="docs/images/journey/org-3-status.webp" width="846" alt="Verification status: details and documents done, Veritas review in progress"></p>
 
+<p align="center">⬇️</p>
+
 **4 · Plan projects.** Projects can be published once the organisation is verified; the page lists what each project needs.
 
 <p align="center"><img src="docs/images/journey/org-4-projects.webp" width="846" alt="Projects page: projects can be published once the organisation is verified"></p>
+
+<p align="center">⬇️</p>
 
 **5 · Then.** Publishing the Passport, capturing evidence on site, signing it and getting paid on approval run through the API today, as section 5.3 shows; their screens come next.
 
