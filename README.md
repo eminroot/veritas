@@ -25,8 +25,8 @@ Veritas is a donation platform for Azerbaijan. A registered organisation publish
 |---|---|
 | **For judges** | Sign in with `admin@gmail.com` / `admin1234` ([section 3](#3-try-it)). |
 | **Quick read** | [Purpose](#1-purpose), [the story](#2-a-short-story-fictional), [the journeys in screenshots](#5-the-journeys-screen-by-screen). |
-| **Diagrams** | [Use cases](#6-use-case-diagram), [architecture](#7-architecture), [data flow](#8-data-flow-diagrams), [entity relationships](#10-data-model-the-app-database), [star schema](#11-analytics-model-the-star-schema). |
-| **Dictionaries** | [Process dictionary](#9-process-dictionary), [table and column dictionary](#106-table-dictionary), [star schema dictionary](#116-table-dictionary), [metafile](docs/analytics/metadata.yml). |
+| **Diagrams** | [Use cases](#6-use-case-diagram), [architecture](#7-architecture), [data flow](#8-data-flow-diagrams), [entity relationships](#103-the-main-entities), [star schema](#11-analytics-model-the-star-schema). |
+| **Dictionaries** | [Process dictionary](#9-process-dictionary), [table and column dictionary](#105-table-dictionary), [star schema dictionary](#116-table-dictionary), [metafile](docs/analytics/metadata.yml). |
 | **Numbers** | [Veritas in numbers](#4-veritas-in-numbers), [metrics and how each is calculated](#12-metrics). |
 
 <details>
@@ -163,12 +163,12 @@ The first three tables come from the web app's **sample data** (invented, for th
 
 | The build | |
 |---|---|
-| Backend tests | **623** pass (1 skipped) |
+| Backend tests | **655** pass (1 skipped) |
 | Contract tests | **74** pass |
-| API endpoints | 94 |
+| API endpoints | 96 |
 | Database tables | 41 (+8 mock) |
 | Smart contracts | 9 |
-| Web app pages | 19 |
+| Web app pages | 20 |
 
 </td>
 </tr>
@@ -298,68 +298,64 @@ What happens to Aysel's ₼50 after she presses *Continue*. Each box is a step, 
 
 ## 6. Use case diagram
 
-Who can do what: people in amber, the systems Veritas works with in purple, and Veritas itself as the big box. One diagram for donors, one for the organisations and the people who check them.
+> **A high-level view.** The diagrams from here to section 11 show the system at a high level, on purpose. Each box stands for a whole piece of work and is drawn as a black box: what happens inside it is not shown. The code, [ARCHITECTURE.md](ARCHITECTURE.md) and the dictionaries further down hold the detail.
+
+Who can do what: people in amber, the outside systems in purple, Veritas as the big box.
 
 **6.1 Donors**
 
-<p align="center"><a href="docs/diagrams/use-cases-donors.md"><img src="docs/images/diagrams/use-cases-donors.png" width="846" alt="Use case diagram for donors: browse, sign in, give, pledge, track, vote, refund or move, with the card provider and the blockchain"></a></p>
+<p align="center"><a href="docs/diagrams/use-cases-donors.md"><img src="docs/images/diagrams/use-cases-donors.png" width="662" alt="Use case diagram for donors: browse and ask the assistant, give, track and vote, refund or move, with OpenAI, the card provider and bank, and the blockchain"></a></p>
 
 **6.2 Organisations, and the people who check them**
 
-<p align="center"><a href="docs/diagrams/use-cases-organisations.md"><img src="docs/images/diagrams/use-cases-organisations.png" width="846" alt="Use case diagram for organisation admins, field workers, Verification Officers and Veritas admins, with the partner bank and the blockchain"></a></p>
+<p align="center"><a href="docs/diagrams/use-cases-organisations.md"><img src="docs/images/diagrams/use-cases-organisations.png" width="846" alt="Use case diagram for organisations, Veritas admins and Verification Officers: register, publish a Passport, prove the work, review and decide, release and pay"></a></p>
 
 **Reading the symbols**
 
 | Symbol | Meaning |
 |---|---|
 | 👤 amber box | An **actor**: a person in a role. One person can have several roles. |
-| 💳 🏦 ⛓️ purple box | An **external system** Veritas works with but does not control. |
-| Blue rounded box | A **use case**: one thing an actor can get done, from start to finish. |
-| Green rounded box | A use case that no person starts directly: Veritas runs it when its rules are met. |
-| Big box *Veritas* | The **system boundary**: everything inside is Veritas. |
-| Solid line | **Association**: this actor (or system) takes part in this use case. |
-| Dotted arrow «include» | The first use case **always** does the second. Giving always records on-chain. |
-| Dotted arrow «extend» | The first use case **sometimes** adds to the second. Pledging is an optional way to give; refund or move happens only if a project stops. |
+| purple box | An **outside system** Veritas works with but does not control. |
+| blue rounded box | A **use case**: one thing an actor gets done. How it works inside is not shown. |
+| green rounded box | A use case Veritas runs by itself once its rules are met. |
+| big box *Veritas* | The **system boundary**: everything inside is Veritas. |
+| line | This actor or system takes part in the use case. |
+| dotted arrow | One use case leads to the next. |
 
-**Every use case**
+**The use cases**
 
-| ID | Use case | Actor | Where it lives today |
+| ID | Use case | Who | Where it lives today |
 |---|---|---|---|
-| UC1 | Browse causes, projects, organisations and the map | Donor (anyone) | Web app, on sample data |
-| UC2 | Sign up and sign in: email and password, or Google; new password by emailed link | Everyone | Web app and API |
-| UC3 | Give by card | Donor | API and contracts; the web app's card form is next |
-| UC4 | Pledge an amount per milestone, charged only when each one is approved | Donor | API and contracts |
-| UC5 | Track every gift: released, in escrow, refunded, with the transaction | Donor | Web app on sample data; API |
-| UC6 | Vote on releasing a milestone (or on a stop or a Passport change) | Donor | API and contracts |
-| UC7 | After a stop: refund to the card, or move the money to another project | Donor | API and contracts |
-| UC8 | Register the organisation: details, people, documents | Organisation admin | Web app and API |
-| UC9 | Publish a Passport: milestones, budget lines, sites, contractor, officer, rules | Organisation admin | API and contracts |
-| UC10 | Capture photos, video and invoices on site, with the one-time code | Field worker | API (the capture screen is next) |
-| UC11 | Sign the checked evidence so it can go public | Organisation admin | API and contracts |
-| UC12 | Review the evidence and the check report; sign approve or reject | Verification Officer | API and contracts |
-| UC13 | Verify organisations, contractors (VÖEN, IBAN, registry) and officers | Veritas admin | API |
-| UC14 | Release an approved milestone and pay the contractor | Veritas, partner bank | API, contracts, the bank adapter |
-| UC15 | Record each step on-chain and read it back | Veritas, blockchain | Relayer and indexer |
+| UC1 | Browse projects, organisations and the map; ask the assistant | Anyone | Web app (on sample data); the assistant through the API and OpenAI |
+| UC2 | Give by card, or pledge to pay on proof | Donor | API and contracts; the web app's card form is next |
+| UC3 | Track every gift; vote on milestones | Donor | Web app on sample data; API and contracts |
+| UC4 | Get a refund or move the money after a stop | Donor | API and contracts |
+| UC5 | Register the organisation and get verified | Organisation, Veritas admin | Web app and API |
+| UC6 | Publish a Project Passport | Organisation | API and contracts |
+| UC7 | Prove the work on site: capture and sign the evidence | Organisation | API (the capture screen is next) |
+| UC8 | Review the evidence and decide | Verification Officer | API and contracts |
+| UC9 | Release the money and pay the contractor | Veritas, partner bank | API, contracts, the bank adapter |
 
 ---
 
 ## 7. Architecture
 
-<p align="center"><a href="docs/diagrams/architecture.md"><img src="docs/images/diagrams/architecture.png" width="799" alt="Architecture: web app and API, PostgreSQL, private files, workers, relayer and indexer, contracts on Polygon, card provider, bank, IPFS and Firebase"></a></p>
+A high-level view: each box is a black box.
 
-Colours: amber are people, blue the Veritas apps, green Veritas's background workers, grey its storage, purple the services outside Veritas.
+<p align="center"><a href="docs/diagrams/architecture.md"><img src="docs/images/diagrams/architecture.png" width="676" alt="High-level architecture: people, web app, API, database and files, workers, card provider and bank, public record on Polygon and IPFS, OpenAI and Firebase"></a></p>
 
-| Part | Where | What it does |
-|---|---|---|
-| Web app | `frontend/` | Pages for donors and organisations. Talks only to the API; uses Firebase only for the Google button. |
-| API | `backend/src/veritas/api` | Accounts, organisations, Passports, donations, evidence, decisions. 94 endpoints. |
-| Database | PostgreSQL 17 with PostGIS | Everything Veritas knows: 41 tables (section 10). |
-| Evidence worker | `backend/src/veritas/evidence` | Runs the 11 checks, builds the redacted public copy, puts it on IPFS. Several can run at once. |
-| Jobs | `backend/src/veritas/workers.py` | The hourly batch, closing votes, charging pledges, payouts, the daily reconciliation. |
-| Relayer | `backend/src/veritas/chain/relayer.py` | The only process that sends transactions. It pays the gas but cannot move money on its own. |
-| Indexer | `backend/src/veritas/chain/indexer.py` | Reads contract events from final blocks back into the database. |
-| Contracts | `contracts/src` | 9 contracts: hub, passport registry, escrow factory and escrows, donation ledger, vAZN, receipts, voting, payout vault. |
-| Card provider, bank | `backend/src/veritas/mocks` | Pretend versions for development and the demo, with the same signatures the real ones would use. |
+Colours: amber are people, blue the Veritas apps, green Veritas's background work, grey its storage, purple the services outside Veritas.
+
+| Part | What it does |
+|---|---|
+| Web app | The pages people use (`frontend/`). It talks only to the API. |
+| Veritas API | Accounts, organisations, Passports, donations, evidence, decisions and the assistant (`backend/src/veritas/api`): 96 endpoints. |
+| Database and private files | Everything Veritas knows, in 41 tables (section 10), and the originals of documents and evidence. |
+| Workers | The background work: the 11 evidence checks, hourly batches, closing votes, payouts, the daily check, and sending to and reading from the blockchain. |
+| Card provider and partner bank | Take card payments, hold the money, pay contractors and refunds. Pretend versions run in development and the demo (`backend/src/veritas/mocks`). |
+| Public record | The smart contracts on Polygon hold the escrow and record every step; IPFS keeps the public copies (`contracts/`). |
+| OpenAI | Writes the assistant's answers from a fixed description of Veritas. The key stays on the server. |
+| Firebase | Only the "Continue with Google" button. |
 
 **What goes on-chain, and what never does.** On-chain: hashes of Passports, evidence and check reports; batch roots and totals; receipts held by per-project donor keys; decisions, votes and releases; the bank's confirmations and daily balance. Never on-chain: names, phone numbers, emails, card numbers, photos or documents. A donor's key is different for every project, so their gifts cannot be linked to each other on-chain. The full design is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -367,68 +363,54 @@ Colours: amber are people, blue the Veritas apps, green Veritas's background wor
 
 ## 8. Data flow diagrams
 
-A data flow diagram shows **what information moves where**, not the order things happen in. Level 0 shows Veritas as one box. Level 1 opens the box: the processes inside it and the data stores they use. The numbers match the [process dictionary](#9-process-dictionary).
+What information moves where, at a high level. Level 0 shows Veritas as one box. Level 1 opens it into five processes, and each process is still a black box. The numbers match the [process dictionary](#9-process-dictionary).
 
 ### 8.1 Reading the symbols
-
-<p align="center"><a href="docs/diagrams/dfd-symbols.md"><img src="docs/images/diagrams/dfd-symbols.png" width="760" alt="Data flow diagram symbols: external entity, process, data store and data flow"></a></p>
 
 | Symbol | Name | Meaning |
 |---|---|---|
 | Amber rectangle | External entity | A person or a system outside Veritas that sends or receives data. |
 | Green rounded box with a number | Process | Something Veritas does that turns incoming data into outgoing data. 1.0 is process 1. |
-| Grey cylinder with D and a number | Data store | Data at rest: a group of database tables or a file store. |
+| Grey cylinder with D and a number | Data store | Data at rest: a group of database tables. |
 | Arrow with a label | Data flow | Data moving in the direction of the arrow; the label says what. |
 | Double arrow | Two flows | Data goes both ways, for example read and write. |
 
 ### 8.2 Level 0: the context
 
-<p align="center"><a href="docs/diagrams/dfd-level-0.md"><img src="docs/images/diagrams/dfd-level-0.png" width="846" alt="Level 0 data flow diagram: Veritas as one process and the people and systems it exchanges data with"></a></p>
+<p align="center"><a href="docs/diagrams/dfd-level-0.md"><img src="docs/images/diagrams/dfd-level-0.png" width="810" alt="Level 0 data flow diagram: Veritas as one process with donors, organisations, officers and admins, the card provider and bank, the blockchain and IPFS, and OpenAI"></a></p>
 
-### 8.3 Level 1a: setting up, and money in
+### 8.3 Level 1: inside Veritas
 
-<p align="center"><a href="docs/diagrams/dfd-level-1a.md"><img src="docs/images/diagrams/dfd-level-1a.png" width="846" alt="Level 1 data flow diagram: accounts, organisation checks, the Passport, donations, the hourly batch, relaying and indexing"></a></p>
+Every process also records its steps on the blockchain; Level 0 shows that flow, so it is left out here.
 
-### 8.4 Level 1b: proof, decisions and money out
+<p align="center"><a href="docs/diagrams/dfd-level-1.md"><img src="docs/images/diagrams/dfd-level-1.png" width="846" alt="Level 1 data flow diagram: five black-box processes (accounts and checks, projects, money in, proof and decisions, money out) and four data stores"></a></p>
 
-<p align="center"><a href="docs/diagrams/dfd-level-1b.md"><img src="docs/images/diagrams/dfd-level-1b.png" width="846" alt="Level 1 data flow diagram: evidence capture and checks, the officer's decision and the donor vote, release and payment"></a></p>
-
-### 8.5 Level 1c: when a project stops, and the daily check
-
-<p align="center"><a href="docs/diagrams/dfd-level-1c.md"><img src="docs/images/diagrams/dfd-level-1c.png" width="711" alt="Level 1 data flow diagram: stopping a project with refunds or moves, and the daily reconciliation"></a></p>
-
-### 8.6 The data stores
+### 8.4 The data stores
 
 | Store | What it holds | Tables |
 |---|---|---|
-| D1 Accounts | People and how they sign in | `users`, `sessions`, `password_resets`, `login_codes`, `devices`, `device_challenges` |
-| D2 Organisations | Who may take part, and the proof of it | `charities`, `charity_members`, `contractors`, `officers`, `kyb_documents` |
-| D3 Projects | The promises | `projects`, `passports`, `milestones`, `budget_lines`, `sites` |
-| D4 Money | Money in, and the daily check | `donations`, `allocations`, `batches`, `batch_leaves`, `receipts`, `pledges`, `pledge_charges`, `reconciliations` |
-| D5 Evidence | The proof and its checks | `capture_sessions`, `evidence_items`, `photo_hashes`, `evidence_bundles`, `evidence_checks`, `check_reports` |
-| D6 Decisions | Decisions, votes and money out | `officer_decisions`, `ballots`, `votes`, `releases`, `payouts`, `claims` |
-| D7 Chain | Calls waiting to go on-chain, and what came back | `chain_outbox`, `chain_events`, `chain_contracts`, `chain_cursor`, `alerts` |
-| D8 Private files | Originals of evidence and organisation documents, by their SHA-256 | an S3-compatible bucket, outside the database |
+| D1 People and organisations | Accounts, sign-in, organisations, contractors, officers, their documents | `users`, `sessions`, `password_resets`, `login_codes`, `devices`, `device_challenges`, `charities`, `charity_members`, `contractors`, `officers`, `kyb_documents` |
+| D2 Projects | The promises | `projects`, `passports`, `milestones`, `budget_lines`, `sites` |
+| D3 Money | Money in and out, and the daily check | `donations`, `allocations`, `batches`, `batch_leaves`, `receipts`, `pledges`, `pledge_charges`, `releases`, `payouts`, `claims`, `reconciliations` |
+| D4 Evidence and decisions | Proof, checks, decisions and votes | `capture_sessions`, `evidence_items`, `photo_hashes`, `evidence_bundles`, `evidence_checks`, `check_reports`, `officer_decisions`, `ballots`, `votes` |
+
+Behind every arrow to the blockchain sit the tables that send and read it: `chain_outbox`, `chain_events`, `chain_contracts`, `chain_cursor` and `alerts`. Private files (documents, evidence originals) are kept outside the database.
 
 ---
 
 ## 9. Process dictionary
 
-Each process of the Level 1 diagrams, opened up: what starts it, what it takes and gives, the rules it enforces, and where the code is (paths under `backend/src/veritas/`).
+The five processes of Level 1. Each is a black box here; the last column says where its code is, under `backend/src/veritas/`.
 
-| No. | Process | Started by | Takes in | Gives out | Stores | Rules that matter | Code |
-|---|---|---|---|---|---|---|---|
-| 1.0 | Manage accounts | A person signing up or in | Email and password, or a Google ID token; a phone code in the phone app | A session token (30 days) | D1 | Passwords: 8 to 128 characters, hashed with scrypt. 10 wrong in a row lock password sign-in for 15 minutes. A new-password link works once, for 30 minutes, at most 5 an hour. Google tokens are verified on the server (signature, issuer, audience, expiry). Only hashes of tokens are stored. | `services/auth.py`, `services/passwords.py`, `services/firebase.py` |
-| 2.0 | Verify organisations | An organisation applying; an admin reviewing | Details, people, documents (PDF, JPEG, PNG) | Verified or rejected, with notes | D2, D8 | Only a verified organisation can set its signing key and publish. Contractors are checked by VÖEN, IBAN and the tax registry; officers are registered by an admin. | `services/charities.py`, `services/contractors.py`, `services/officers.py` |
-| 3.0 | Publish the Passport | The organisation | A draft Passport and the organisation's signature | Canonical bytes, their SHA-256 and IPFS CID; milestones, budget lines, sites | D2, D3, D7 | The draft must name a verified contractor, an active officer, budgets that add up and every site a real polygon in Azerbaijan, no wider than about 25 km. After launch it changes only by a donor vote, and never its amounts, deadlines or decision rules. | `services/passports.py`, `services/amendments.py` |
-| 4.0 | Take a donation | The card provider's webhook | Signed webhook, the provider's payment record | A donation and its allocations | D3, D4 | The webhook's HMAC and timestamp are checked, then the payment is fetched again; only that answer counts. One payment id makes one donation, even if the webhook arrives twice. Pledges are charged once per approval. | `payments/webhooks.py`, `payments/intake.py`, `decisions/pledges.py` |
-| 5.0 | Batch and anchor, hourly | A job, every hour | New allocations | A Merkle tree, the bank's signature, one anchoring call | D4, D7 | Whole donations only, so the bank can check every payment it signs for. One batch in flight at a time. | `payments/batches.py` |
-| 6.0 | Capture and check evidence | A field worker opening a capture session | Files, GPS fixes, the signed manifest, the organisation's signature | A sealed bundle, 11 check results, a redacted public copy | D3, D5, D8, D7 | The one-time code lasts 15 minutes; files may arrive up to 60 minutes later. A file whose hash differs from what the phone declared is refused. GPS must be within 50 m accuracy. Nothing goes public before the organisation signs. | `evidence/capture.py`, `evidence/intake.py`, `evidence/pipeline.py`, `evidence/checks/` |
-| 7.0 | Decide: officer, then donors | A checked bundle; the officer; donors | Signed decision; signed votes with Merkle proofs | Decision, ballot, votes, the result | D5, D6, D7 | A decision names the exact bundle and report. Overriding a failed hard check, or rejecting, needs a written reason. Votes: one receipt one vote, at least ₼5 behind it, 72 hours, more than half yes; under 10% turnout the vote is extended 48 hours once, then the officer's decision stands. | `decisions/officer.py`, `decisions/voting.py` |
-| 8.0 | Release and pay | An approved milestone | The approval, a fresh balanced bank attestation | A release, a payout instruction, the bank's confirmation | D6, D7 | Money goes only to the Passport's contractor, against the approved invoice. A payment that comes back is not retried by itself: a person is alerted. | `decisions/payouts.py` |
-| 9.0 | Stop: refund or move | The organisation withdrawing, a stop vote, or a missed deadline | The donor's signed choice, or the default | Claims, refunds, redirected allocations | D4, D6, D7 | Each donor chooses within the choice window; after it the Passport's default applies. A move goes to another live project in one transaction. | `decisions/stops.py` |
-| 10.0 | Reconcile, daily | A job, once a day | Supply on-chain, the ledger, the bank's signed balance | A reconciliation, alerts | D4, D7 | Runs at a quiet moment, with nothing half-way. If the bank and the chain disagree, the contracts refuse releases until a balanced attestation arrives. | `payments/reconcile.py` |
-| 11.0 | Relay and index | Any change that must go on-chain | Outbox rows; finalised blocks | Transactions; stored events | D7 and every store it updates | One sender at a time, one transaction in flight, signed bytes saved before sending. Only final blocks are read; every event is stored once and applied in chain order. | `chain/relayer.py`, `chain/indexer.py`, `chain/outbox.py` |
+| No. | Process | What it does | Takes in | Gives out | Stores | Code |
+|---|---|---|---|---|---|---|
+| 1.0 | Accounts and checks | Signs people in (an email and a password, Google, or a phone code) and verifies organisations, contractors and officers. | Sign-in details, applications, documents | Sessions, verified organisations | D1 | `services/` |
+| 2.0 | Projects | Checks and publishes a Project Passport, and locks its fingerprint on-chain. | The organisation's draft and signature | A published Passport: milestones, budgets, sites | D1, D2 | `services/passports.py` |
+| 3.0 | Money in | Takes card payments and pledges, splits them by milestone, and anchors them every hour with the bank's signature. | Payments, pledges | Donations, receipts | D2, D3 | `payments/` |
+| 4.0 | Proof and decisions | Collects the evidence from the site, runs the 11 checks, and takes the officer's decision and the donors' vote. | Photos, invoices, decisions, votes | Check reports, results | D2, D4 | `evidence/`, `decisions/` |
+| 5.0 | Money out | Releases approved milestones to the contractor, refunds or moves money after a stop, and checks every day that the bank, the chain and the ledger agree. | Approvals, claims, the bank's answers | Payouts, refunds, the daily check | D3, D4 | `decisions/`, `payments/reconcile.py` |
+
+Sending to the blockchain and reading it back (`chain/relayer.py`, `chain/indexer.py`) serves all five. The assistant (`assistant/`) only answers questions: it reads none of these stores.
 
 ---
 
@@ -448,11 +430,9 @@ The app database is where Veritas **writes**. It is normalised (third normal for
 | Constraint names follow one pattern: `pk_<table>`, `fk_<table>_<column>_<referred table>`, `uq_<table>_<columns>`, `ck_<table>_<rule>`, `ix_<table>_<columns>` | A migration can refer to a constraint by name, and the name is the same on every database. |
 | Table names are plural snake case (`evidence_bundles`); columns are singular | One habit everywhere. |
 
-### 10.2 Reading the diagrams
+### 10.2 Reading the diagram
 
-The diagrams use **crow's foot** notation. Each end of a line says how many rows can be on that side.
-
-<p align="center"><a href="docs/diagrams/erd-symbols.md"><img src="docs/images/diagrams/erd-symbols.png" width="846" alt="Crow's foot symbols: zero or many, one or many, an optional parent, zero or one, and a logical link"></a></p>
+The diagram uses **crow's foot** notation. Each end of a line says how many rows can be on that side.
 
 | Symbol at a line's end | Meaning |
 |---|---|
@@ -461,91 +441,34 @@ The diagrams use **crow's foot** notation. Each end of a line says how many rows
 | `o{` | zero or many |
 | `\|{` | one or many |
 | solid line `--` | a foreign key the database enforces |
-| dotted line `..` | a link by value that the code keeps, with no foreign key (for example a milestone found by `project_id` and `milestone_index`) |
-| `PK` | primary key: identifies a row in its own table |
-| `FK` | foreign key: a column that points to another table's primary key |
-| `UK` | unique: no two rows share the value |
+| dotted line `..` | a link by value that the code keeps, with no foreign key (a milestone found by `project_id` and `milestone_index`) |
 
-### 10.3 The whole database at a glance
+### 10.3 The main entities
 
-The 41 tables fall into five areas. This map shows the areas and the keys that join them; each area is drawn in full, with crow's feet, in 10.4.
+A high-level view: 11 of the 41 tables, the ones the story needs, without their columns. The other 30 (sign-in, the money's batches and receipts, check results, the chain outbox and so on) are working details behind these; every table and column is in the dictionaries below.
 
-<p align="center"><a href="docs/diagrams/database-areas.md"><img src="docs/images/diagrams/database-areas.png" width="583" alt="The database's five areas and the keys that join them"></a></p>
+<p align="center"><a href="docs/diagrams/erd-overview.md"><img src="docs/images/diagrams/erd-overview.png" width="846" alt="High-level entity relationship diagram: users, charities, contractors, projects, milestones, donations, evidence bundles, officers, decisions, ballots and releases"></a></p>
 
-### 10.4 Each area in full
+### 10.4 Relationships in words
 
-**Accounts and organisations** (11 tables). *People, and how they sign in:*
+| From (the "one" side) | To (the "many" side) | Type | Meaning |
+|---|---|---|---|
+| `users` | `charities` | many : many | A person can work for several organisations, and an organisation has several people. The bridge table `charity_members` holds each pair, with a role. |
+| `charities` | `contractors` | 1 : many | An organisation registers the companies it will pay. |
+| `charities` | `projects` | 1 : many | An organisation runs projects. |
+| `projects` | `milestones` | 1 : 1..many | A project is paid in milestones. |
+| `projects` | `donations` | 1 : many | A project receives donations. |
+| `users` | `donations` | 0..1 : many | A guest can give without an account. |
+| `milestones` | `evidence_bundles` | 1 : many, logical | Each try at proving a milestone is one sealed bundle. |
+| `officers` | `officer_decisions` | 1 : many | An officer signs many decisions. |
+| `milestones` | `officer_decisions`, `ballots`, `releases` | 1 : many, logical | A milestone is decided, voted on and paid, one try at a time. |
 
-<p align="center"><a href="docs/diagrams/erd-people.md"><img src="docs/images/diagrams/erd-people.png" width="825" alt="Entity relationship diagram: users, sessions, password resets, login codes, devices and device challenges"></a></p>
+**Many-to-many.** A database cannot store a many-to-many link directly, so a bridge table sits in the middle: each row of `charity_members` is one person in one organisation.
 
-*Organisations, and who checks them* (`users` is the table above; `device_challenges.charity_id` also points to `charities`):
+### 10.5 Table dictionary
 
-<p align="center"><a href="docs/diagrams/erd-organisations.md"><img src="docs/images/diagrams/erd-organisations.png" width="740" alt="Entity relationship diagram: charities, charity members, contractors, officers and documents"></a></p>
-
-**Projects and their promises** (5 tables)
-
-<p align="center"><a href="docs/diagrams/erd-projects.md"><img src="docs/images/diagrams/erd-projects.png" width="622" alt="Entity relationship diagram: projects, passports, milestones, budget lines and sites"></a></p>
-
-**Money** (11 tables). *Money in:*
-
-<p align="center"><a href="docs/diagrams/erd-money-in.md"><img src="docs/images/diagrams/erd-money-in.png" width="500" alt="Entity relationship diagram: donations, allocations, batches, batch leaves, receipts, pledges and pledge charges"></a></p>
-
-*Money out, and the daily check* (`projects` is drawn in the area above):
-
-<p align="center"><a href="docs/diagrams/erd-money-out.md"><img src="docs/images/diagrams/erd-money-out.png" width="766" alt="Entity relationship diagram: releases, payouts, claims and reconciliations"></a></p>
-
-**Evidence and decisions** (9 tables). *Evidence:*
-
-<p align="center"><a href="docs/diagrams/erd-evidence.md"><img src="docs/images/diagrams/erd-evidence.png" width="761" alt="Entity relationship diagram: capture sessions, evidence items, photo hashes, bundles, checks and reports"></a></p>
-
-*Decisions* (`milestones` and `officers` are drawn in the areas above):
-
-<p align="center"><a href="docs/diagrams/erd-decisions.md"><img src="docs/images/diagrams/erd-decisions.png" width="545" alt="Entity relationship diagram: officer decisions, ballots and votes"></a></p>
-
-**Talking to the blockchain** (5 tables)
-
-<p align="center"><a href="docs/diagrams/erd-chain.md"><img src="docs/images/diagrams/erd-chain.png" width="846" alt="Entity relationship diagram: chain outbox, chain events, contracts, cursor and alerts"></a></p>
-
-Twelve tables point to `chain_outbox` through an optional `outbox_id` (or `submit_outbox_id`, `checks_outbox_id`, `close_outbox_id`): the call that records that row on-chain. Those lines are left out above so the diagrams stay readable; every one is zero-or-one to `chain_outbox`.
-
-### 10.5 Relationships in words
-
-| From (the "one" side) | To (the "many" side) | Type | Key | Meaning |
-|---|---|---|---|---|
-| `users` | `sessions` | 1 : many | `user_id` | A person can be signed in on several browsers and phones. |
-| `users` | `devices` | 1 : many | `user_id` | A field worker can register several phones; each key is registered once, ever. |
-| `charities` | `charity_members` | 1 : many | `charity_id` | An organisation has admins and field workers. |
-| `users` | `charity_members` | 1 : many | `user_id` | One person can work for more than one organisation. Together these two make a **many-to-many** between people and organisations. |
-| `charities` | `contractors` | 1 : many | `charity_id` | An organisation registers the companies it will pay. |
-| `users` | `officers` | 0..1 : 0..1 | `user_id` (unique) | An officer may have an account; an account is at most one officer. |
-| `charities` | `projects` | 1 : many | `charity_id` | An organisation runs projects. |
-| `projects` | `passports` | 1 : many | `project_id` | Each amendment is a new version; one is published at a time. |
-| `projects` | `milestones` | 1 : many | `project_id` | A project is paid in milestones. |
-| `milestones` | `budget_lines`, `sites` | 1 : many | `milestone_id` | A milestone's cost lines and the places its work happens. |
-| `users` | `donations` | 0..1 : many | `user_id` (optional) | A guest can give without an account. |
-| `donations` | `allocations` | 1 : 1..many | `donation_id` | A donation is split across one or more milestones. |
-| `batches` | `allocations` | 0..1 : many | `batch_id` (optional) | An allocation waits until the next hourly batch takes it. |
-| `allocations` | `batch_leaves` | 1 : 0..1 | `allocation_id` (the key) | Once batched, an allocation has exactly one place in the tree. |
-| `pledges` | `pledge_charges` | 1 : many | `pledge_id` | One charge per approved milestone. |
-| `pledge_charges` | `donations` | 0..1 : many | `pledge_charge_id` | A successful charge comes back as a donation. |
-| `capture_sessions` | `evidence_items` | 1 : many | `session_id` | A visit to the site collects files. |
-| `capture_sessions` | `evidence_bundles` | 1 : 0..1 | `session_id` (unique) | A visit is sealed into at most one bundle. |
-| `evidence_bundles` | `evidence_checks` | 1 : many | `bundle_id` | 11 checks per bundle. |
-| `evidence_bundles` | `check_reports` | 1 : 0..1 | `bundle_id` (unique) | One report per bundle, its hash on-chain. |
-| `evidence_items` | `photo_hashes` | 1 : 0..1 | `item_id` (unique) | Every photo is fingerprinted once. |
-| `officers` | `officer_decisions` | 1 : many | `officer_id` | An officer signs many decisions. |
-| `ballots` | `votes` | 1 : many | `ballot_id` | Each ballot collects donors' votes. |
-| `projects` | `releases`, `payouts`, `claims`, `receipts`, `ballots` | 1 : many | `project_id` | Everything that happens to a project's money. |
-| `projects` | `claims` (as target) | 0..1 : many | `target_project_id` | Where moved money goes; empty for a refund. |
-| `milestones` | `capture_sessions`, `officer_decisions`, `ballots`, `releases`, `allocations` | 1 : many, logical | `project_id` + `milestone_index` | Matched by value: the chain knows milestones by their number in the project, so these tables do too. |
-| `receipts` | `allocations`, `votes`, `claims` | logical | `project_id` + `holder` | The donor's key for the project links their gifts, receipt, votes and claims, without a name. |
-| `chain_outbox` | 12 tables | 0..1 : many | `outbox_id` | The on-chain call that records the row, once it exists. |
-
-**Many-to-many.** People and organisations: a person can work for several organisations and an organisation has several people. A database cannot store that directly, so `charity_members` sits in the middle as a **bridge**: each row is one person in one organisation, with a role.
-
-**Polymorphic link.** `kyb_documents` belongs either to an organisation or to a contractor. `owner_type` says which table, `owner_id` which row; the code checks the link, not a foreign key.
-
-### 10.6 Table dictionary
+<details>
+<summary><b>All 41 tables</b>, what one row is and its primary key</summary>
 
 | Table | Area | One row is... | Primary key |
 |---|---|---|---|
@@ -591,9 +514,11 @@ Twelve tables point to `chain_outbox` through an optional `outbox_id` (or `submi
 | `chain_cursor` | Chain | one reader's place in the chain | `name` |
 | `alerts` | Chain | one thing an operator should look at | `id` |
 
+</details>
+
 Eight more tables start with `mock_`: the pretend card provider and bank used in development and the demo. They are not part of Veritas and are left out here.
 
-### 10.7 Column dictionary
+### 10.6 Column dictionary
 
 Every column of every table, generated from the models in `backend/src/veritas/db/models`, so types, keys and required flags are exact. Open an area to read it.
 
@@ -1343,23 +1268,9 @@ The repetition in a star costs a few kilobytes here, and the app database stays 
 
 Five fact tables (events) share four dimension tables (descriptions). Kimball calls this a **constellation**: each fact with its dimensions is one star, and the shared dimensions are **conformed**, meaning `dim_project` means the same thing to every fact.
 
-Dimensions are drawn with their keys and main columns, so the diagrams stay readable; every column of every table is in the dictionary in 11.7.
+A high-level view of one star, **money in**, with only its keys and its measure. The other four fact tables are stars of the same shape around the same dimensions (the bus matrix in 11.5 shows which), and every column of every table is in the dictionary in 11.7.
 
-**Money in.**
-
-<p align="center"><a href="docs/diagrams/star-donation.md"><img src="docs/images/diagrams/star-donation.png" width="846" alt="Star schema: fact_donation with dim_date, dim_donor, dim_project and dim_milestone"></a></p>
-
-**Money back after a stop.** `dim_project` plays two roles here: the stopped project and the target project.
-
-<p align="center"><a href="docs/diagrams/star-claim.md"><img src="docs/images/diagrams/star-claim.png" width="770" alt="Star schema: fact_claim with dim_date, dim_donor and dim_project in two roles"></a></p>
-
-**Money out.** `dim_date` plays two roles here: the day released and the day paid.
-
-<p align="center"><a href="docs/diagrams/star-money-out.md"><img src="docs/images/diagrams/star-money-out.png" width="793" alt="Star schema: fact_release with dim_date in two roles, dim_project and dim_milestone"></a></p>
-
-**Proof and decisions.** The same dimensions, shared (conformed).
-
-<p align="center"><a href="docs/diagrams/star-proof.md"><img src="docs/images/diagrams/star-proof.png" width="846" alt="Star schema: fact_evidence_check and fact_ballot with dim_date, dim_project and dim_milestone"></a></p>
+<p align="center"><a href="docs/diagrams/star-schema.md"><img src="docs/images/diagrams/star-schema.png" width="846" alt="Star schema: fact_donation with dim_date, dim_donor, dim_project and dim_milestone, keys only"></a></p>
 
 ### 11.4 Reading it
 
@@ -1719,17 +1630,18 @@ A failed **hard** check blocks the release unless the officer overrides it with 
 | Card webhooks | HMAC-SHA256 with a timestamp, compared in constant time; old ones refused; the payment is fetched again before it counts |
 | Uploads | 20 MB per file; type checked by its first bytes, hash checked against the phone's |
 | Signatures | EIP-712 for evidence, decisions, votes and claims, each by its own key |
+| Assistant | 6 questions a minute and 60 a day per visitor, 2,000 model calls a day in all (per API process); questions up to 1,000 characters; it sees only a fixed description of Veritas, has no tools and no data, refuses plain prompt injections before the model, accepts its earlier replies back only with the server's signature, and withholds an answer that gives away its rules; the OpenAI key stays on the server |
 | Personal data | never on-chain; documents and original photos in private storage; faces and number plates are blurred before a photo goes public, and until the detector is in, photos stay out of the public copy |
 
 ### 12.5 Engineering
 
 | What | Number |
 |---|---|
-| Backend | 18,980 lines of Python; 9,914 lines of tests; **623 tests pass** (1 skipped), against PostgreSQL 17 + PostGIS and a local chain |
-| API | 94 endpoints |
+| Backend | 19,563 lines of Python; 10,252 lines of tests; **655 tests pass** (1 skipped), against PostgreSQL 17 + PostGIS and a local chain |
+| API | 96 endpoints |
 | Database | 41 tables (+8 mock), 4 migrations |
 | Contracts | 9 contracts, 2,311 lines of Solidity; 2,919 lines of tests; **74 tests pass** |
-| Web app | 19 pages; 11,396 lines of TypeScript; main bundle 461 KB (141 KB gzipped), Firebase loaded separately (154 KB) only for Google sign-in |
+| Web app | 20 pages; 11,740 lines of TypeScript and 5,287 of CSS; main bundle 467 KB (144 KB gzipped), Firebase loaded separately (154 KB) only for Google sign-in |
 | Analytics | 9 tables, 92 columns, every one commented |
 | CI | GitHub Actions for the backend (with PostGIS and Anvil), the contracts and the web app |
 
@@ -1762,7 +1674,8 @@ On Polygon this is cents per transaction, and only the relayer's account needs f
 | 12 | The star schema is designed, documented and tested on PostgreSQL; the nightly job that fills it from the app database comes with deployment. | The metric formulas are fixed now; the numbers in section 4 come from the sample data. |
 | 13 | Each donor signs with a different key for every project, kept on their own device (the phone's secure storage; in the web app, the browser, next). | Their gifts cannot be linked to each other on-chain. |
 | 14 | The two projects in Ukraine are sample data in the web app. The backend's Passport accepts sites inside Azerbaijan today (a rough box that catches swapped coordinates); projects abroad need a country rule first. | The sample shows where Veritas is going, not what the backend accepts now. |
-| 15 | Google sign-in needs the Firebase project's settings in `frontend/.env.local` and `backend/.env` (both ignored by git); email and password sign-in needs nothing external. | Sign-in works on any server, Google or not. |
+| 15 | The assistant answers only from a fixed description of Veritas (`backend/src/veritas/assistant/knowledge.py`). It can be wrong, it cannot see accounts or live figures, and it is off until `VERITAS_OPENAI_API_KEY` is set in `backend/.env`. | Visitors get quick answers without anything private being exposed. |
+| 16 | Google sign-in needs the Firebase project's settings in `frontend/.env.local` and `backend/.env` (both ignored by git); email and password sign-in needs nothing external. | Sign-in works on any server, Google or not. |
 
 ---
 
@@ -1777,7 +1690,7 @@ uv sync
 uv run alembic upgrade head
 uv run python scripts/seed_demo.py         # the demo account
 uv run uvicorn veritas.api.app:create_app --factory --reload
-uv run pytest                               # 623 tests
+uv run pytest                               # 655 tests
 
 # contracts
 cd contracts
@@ -1804,7 +1717,7 @@ Each part's README has the details: [backend](backend/README.md), [contracts](co
 | Backend | Python 3.12, FastAPI, Pydantic, SQLAlchemy 2, Alembic |
 | Database | PostgreSQL 17 with PostGIS |
 | Evidence checks | OpenCV, Pillow and imagehash today; Tesseract and c2pa-python next |
-| AI | Ollama with local vision and text models, on our own servers (next) |
+| AI | The assistant: an OpenAI model through the API (gpt-4.1-mini by default). Evidence review: Ollama with local vision and text models, on our own servers (next) |
 | Storage | Private S3-compatible bucket; IPFS (Kubo) for public copies |
 | Contracts | Solidity 0.8, OpenZeppelin 5, Foundry |
 | Chain | web3.py, EIP-712 signatures, Polygon Amoy testnet for the demo |
