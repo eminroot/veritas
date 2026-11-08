@@ -227,34 +227,9 @@ Read each row left to right. The screenshots are the real web app on a phone (39
 
 ### 5.3 Behind the screens: one gift, start to finish
 
-What happens to Aysel's ₼50 after she presses *Continue*. Each box is a step, numbered in the order it happens.
+What happens to Aysel's ₼50 after she presses *Continue*. Each box is a step, numbered in the order it happens. (Every diagram in this README is an image drawn from a Mermaid file in [docs/diagrams](docs/diagrams); click a diagram to open its source, which GitHub draws live, with zoom.)
 
-```mermaid
-flowchart LR
-    classDef person fill:#FFF4D6,stroke:#B7791F,color:#3D2A00
-    classDef step fill:#E6FFFA,stroke:#2C7A7B,color:#0B3B3B
-    classDef money fill:#E8F1FF,stroke:#2B6CB0,color:#0B2545
-
-    subgraph IN["Money in"]
-        direction TB
-        A["👤 Aysel gives ₼50"]:::person --> B["1 · Card payment<br/>signed webhook"]:::step
-        B --> C["2 · Split by milestone<br/>one Merkle leaf each"]:::step
-        C --> D["3 · Hourly batch<br/>bank signs, chain anchors"]:::money
-        D --> E["4 · In escrow<br/>receipt token"]:::money
-    end
-    subgraph PROOF["Proof and decision"]
-        direction TB
-        F["5 · Evidence on site<br/>GPS, time, one-time code"]:::step --> G["6 · 11 checks<br/>report hash on-chain"]:::step
-        G --> H["7 · Officer signs<br/>approve or reject"]:::step
-        H --> I["8 · Donors vote<br/>72 hours"]:::step
-    end
-    subgraph OUT["Money out"]
-        direction TB
-        J["9 · Release<br/>to the payout vault"]:::money --> K["10 · Bank pays<br/>the contractor"]:::money
-        K --> L["11 · Daily check<br/>bank = chain = ledger"]:::step
-    end
-    IN --> PROOF --> OUT
-```
+<p align="center"><a href="docs/diagrams/gift-flow.md"><img src="docs/images/diagrams/gift-flow.png" width="846" alt="Flow of one gift: money in (card payment, split by milestone, hourly batch, escrow), proof and decision (evidence, 11 checks, officer, donor vote), money out (release, bank pays, daily check)"></a></p>
 
 | # | Who acts | What happens | Written to (tables) | On-chain |
 |---|---|---|---|---|
@@ -274,79 +249,15 @@ flowchart LR
 
 ## 6. Use case diagram
 
-Who can do what. People are on the left, other systems on the right, and Veritas is the box in the middle.
+Who can do what: people in amber, the systems Veritas works with in purple, and Veritas itself as the big box. One diagram for donors, one for the organisations and the people who check them.
 
 **6.1 Donors**
 
-```mermaid
-flowchart LR
-    classDef actor fill:#FFF4D6,stroke:#B7791F,color:#3D2A00,stroke-width:1.5px
-    classDef uc fill:#E8F1FF,stroke:#2B6CB0,color:#0B2545
-    classDef shared fill:#E6FFFA,stroke:#2C7A7B,color:#0B3B3B
-    classDef system fill:#EFE9FF,stroke:#6B46C1,color:#22104A,stroke-width:1.5px
-
-    donor["👤 Donor"]:::actor
-    subgraph veritas["Veritas"]
-        u1(["UC1 Browse causes,<br/>projects and the map"]):::uc
-        u2(["UC2 Sign up and sign in"]):::uc
-        u3(["UC3 Give by card"]):::uc
-        u4(["UC4 Pledge: pay on proof"]):::uc
-        u5(["UC5 Track every gift"]):::uc
-        u6(["UC6 Vote on a milestone"]):::uc
-        u7(["UC7 Refund or move<br/>after a stop"]):::uc
-        u15(["UC15 Record on-chain"]):::shared
-    end
-    card["💳 Card provider"]:::system
-    chain["⛓️ Blockchain"]:::system
-
-    donor --- u1 & u2 & u3 & u5 & u6
-    u4 -. "«extend»" .-> u3
-    u7 -. "«extend»" .-> u5
-    u3 -. "«include»" .-> u15
-    u6 -. "«include»" .-> u15
-    u3 --- card
-    u4 --- card
-    u15 --- chain
-```
+<p align="center"><a href="docs/diagrams/use-cases-donors.md"><img src="docs/images/diagrams/use-cases-donors.png" width="846" alt="Use case diagram for donors: browse, sign in, give, pledge, track, vote, refund or move, with the card provider and the blockchain"></a></p>
 
 **6.2 Organisations, and the people who check them**
 
-```mermaid
-flowchart LR
-    classDef actor fill:#FFF4D6,stroke:#B7791F,color:#3D2A00,stroke-width:1.5px
-    classDef uc fill:#E8F1FF,stroke:#2B6CB0,color:#0B2545
-    classDef shared fill:#E6FFFA,stroke:#2C7A7B,color:#0B3B3B
-    classDef system fill:#EFE9FF,stroke:#6B46C1,color:#22104A,stroke-width:1.5px
-
-    org["👤 Organisation admin"]:::actor
-    field["👤 Field worker"]:::actor
-    officer["👤 Verification Officer"]:::actor
-    admin["👤 Veritas admin"]:::actor
-    subgraph veritas["Veritas"]
-        u2(["UC2 Sign up and sign in"]):::uc
-        u8(["UC8 Register the organisation"]):::uc
-        u9(["UC9 Publish a Passport"]):::uc
-        u11(["UC11 Sign the evidence"]):::uc
-        u10(["UC10 Capture evidence on site"]):::uc
-        u12(["UC12 Review and decide"]):::uc
-        u13(["UC13 Verify organisations,<br/>contractors, officers"]):::uc
-        u14(["UC14 Release and pay"]):::shared
-        u15(["UC15 Record on-chain"]):::shared
-    end
-    bank["🏦 Partner bank"]:::system
-    chain["⛓️ Blockchain"]:::system
-
-    org --- u2 & u8 & u9 & u11
-    field --- u10
-    officer --- u12
-    admin --- u13
-    u9 -. "«include»" .-> u15
-    u11 -. "«include»" .-> u15
-    u12 -. "«include»" .-> u15
-    u14 -. "«include»" .-> u15
-    u14 --- bank
-    u15 --- chain
-```
+<p align="center"><a href="docs/diagrams/use-cases-organisations.md"><img src="docs/images/diagrams/use-cases-organisations.png" width="846" alt="Use case diagram for organisation admins, field workers, Verification Officers and Veritas admins, with the partner bank and the blockchain"></a></p>
 
 **Reading the symbols**
 
@@ -385,45 +296,7 @@ flowchart LR
 
 ## 7. Architecture
 
-```mermaid
-flowchart TB
-    classDef people fill:#FFF4D6,stroke:#B7791F,color:#3D2A00
-    classDef app fill:#E8F1FF,stroke:#2B6CB0,color:#0B2545
-    classDef worker fill:#E6FFFA,stroke:#2C7A7B,color:#0B3B3B
-    classDef store fill:#F1F5F9,stroke:#475569,color:#0F172A
-    classDef outside fill:#EFE9FF,stroke:#6B46C1,color:#22104A
-
-    U["👤 Donors, organisations,<br/>officers, admins"]:::people
-    F["👤 Field worker's phone"]:::people
-    subgraph SERVERS["Veritas servers"]
-        W["Web app<br/>React + TypeScript"]:::app
-        API["Veritas API<br/>FastAPI, 94 endpoints"]:::app
-        DB[("PostgreSQL 17 + PostGIS<br/>41 tables")]:::store
-        S3[("Private file storage")]:::store
-        EV["Evidence worker<br/>11 checks, redaction"]:::worker
-        JOBS["Jobs<br/>hourly batch, votes,<br/>payouts, reconciliation"]:::worker
-        RL["Relayer<br/>sends transactions"]:::worker
-        IX["Indexer<br/>reads final blocks"]:::worker
-    end
-    CARD["💳 Card provider"]:::outside
-    BANK["🏦 Partner bank"]:::outside
-    CH["⛓️ Contracts on Polygon<br/>escrow, ledger, receipts,<br/>voting, payout vault"]:::outside
-    IPFS[("IPFS<br/>public copies")]:::outside
-    FB["Firebase Auth<br/>Google sign-in only"]:::outside
-
-    U --> W --> API
-    F --> API
-    W -.-> FB
-    CARD -- "signed webhooks" --> API
-    API <--> DB
-    API --> S3
-    EV <--> DB
-    EV --> IPFS
-    JOBS <--> DB
-    JOBS <-->|"signed instructions<br/>and confirmations"| BANK
-    DB --> RL --> CH
-    CH --> IX --> DB
-```
+<p align="center"><a href="docs/diagrams/architecture.md"><img src="docs/images/diagrams/architecture.png" width="846" alt="Architecture: web app and API, PostgreSQL, evidence worker, jobs, relayer and indexer, contracts on Polygon, card provider, bank, IPFS and Firebase"></a></p>
 
 | Part | Where | What it does |
 |---|---|---|
@@ -447,14 +320,7 @@ A data flow diagram shows **what information moves where**, not the order things
 
 ### 8.1 Reading the symbols
 
-```mermaid
-flowchart LR
-    classDef ext fill:#FFF4D6,stroke:#B7791F,color:#3D2A00
-    classDef proc fill:#E6FFFA,stroke:#2C7A7B,color:#0B3B3B,stroke-width:2px
-    classDef store fill:#F1F5F9,stroke:#475569,color:#0F172A
-    E["External entity"]:::ext -- "data flow: what moves" --> P(["1.0 Process"]):::proc
-    P -- "data flow" --> D[("D1 Data store")]:::store
-```
+<p align="center"><a href="docs/diagrams/dfd-symbols.md"><img src="docs/images/diagrams/dfd-symbols.png" width="760" alt="Data flow diagram symbols: external entity, process, data store and data flow"></a></p>
 
 | Symbol | Name | Meaning |
 |---|---|---|
@@ -466,174 +332,19 @@ flowchart LR
 
 ### 8.2 Level 0: the context
 
-```mermaid
-flowchart LR
-    classDef ext fill:#FFF4D6,stroke:#B7791F,color:#3D2A00
-    classDef proc fill:#E6FFFA,stroke:#2C7A7B,color:#0B3B3B,stroke-width:2px
-
-    donor["Donor"]:::ext
-    org["Organisation"]:::ext
-    field["Field worker"]:::ext
-    officer["Verification Officer"]:::ext
-    admin["Veritas admin"]:::ext
-    V(["0<br/>Veritas"]):::proc
-    card["Card provider"]:::ext
-    bank["Partner bank"]:::ext
-    chain["Blockchain"]:::ext
-    ipfs["IPFS"]:::ext
-
-    donor -- "card payment, votes,<br/>refund or move" --> V
-    V -- "receipts, gift status,<br/>proof timeline" --> donor
-    org -- "application, documents,<br/>Passport, signatures" --> V
-    V -- "verification, money raised,<br/>decisions" --> org
-    field -- "photos, GPS,<br/>signed manifest" --> V
-    V -- "one-time code" --> field
-    officer -- "signed decision" --> V
-    V -- "evidence, check report" --> officer
-    admin -- "verify or reject" --> V
-    V -- "applications, alerts" --> admin
-    V -- "charges" --> card
-    card -- "signed webhooks" --> V
-    V -- "payout and refund<br/>instructions" --> bank
-    bank -- "signatures, balance,<br/>confirmations" --> V
-    V -- "transactions" --> chain
-    chain -- "events" --> V
-    V -- "public copies" --> ipfs
-```
+<p align="center"><a href="docs/diagrams/dfd-level-0.md"><img src="docs/images/diagrams/dfd-level-0.png" width="846" alt="Level 0 data flow diagram: Veritas as one process and the people and systems it exchanges data with"></a></p>
 
 ### 8.3 Level 1a: setting up, and money in
 
-```mermaid
-flowchart TB
-    classDef ext fill:#FFF4D6,stroke:#B7791F,color:#3D2A00
-    classDef proc fill:#E6FFFA,stroke:#2C7A7B,color:#0B3B3B,stroke-width:2px
-    classDef store fill:#F1F5F9,stroke:#475569,color:#0F172A
-
-    donor["Donor"]:::ext
-    org["Organisation admin"]:::ext
-    admin["Veritas admin"]:::ext
-    card["Card provider"]:::ext
-    bank["Partner bank"]:::ext
-    chain["Blockchain"]:::ext
-
-    p1(["1.0 Manage accounts"]):::proc
-    p2(["2.0 Verify organisations"]):::proc
-    p3(["3.0 Publish the Passport"]):::proc
-    p4(["4.0 Take a donation"]):::proc
-    p5(["5.0 Batch and anchor, hourly"]):::proc
-    p11(["11.0 Relay and index"]):::proc
-
-    d1[("D1 Accounts")]:::store
-    d2[("D2 Organisations")]:::store
-    d3[("D3 Projects")]:::store
-    d4[("D4 Money")]:::store
-    d7[("D7 Chain")]:::store
-    d8[("D8 Private files")]:::store
-
-    donor -- "email and password,<br/>or Google token" --> p1
-    p1 -- "session" --> donor
-    p1 <--> d1
-    org -- "details, documents" --> p2
-    p2 -- "documents" --> d8
-    admin -- "verify or reject" --> p2
-    p2 <--> d2
-    org -- "Passport, signature" --> p3
-    d2 -- "verified organisation,<br/>contractor, officer" --> p3
-    p3 -- "milestones, budget,<br/>sites" --> d3
-    p3 -- "launch call" --> d7
-    donor -- "amount, project" --> p4
-    p4 -- "payment" --> card
-    card -- "signed webhook" --> p4
-    d3 -- "split rule" --> p4
-    p4 -- "donation, allocations" --> d4
-    d4 -- "new allocations" --> p5
-    p5 -- "root and totals" --> bank
-    bank -- "signature" --> p5
-    p5 -- "batch, anchor call" --> d7
-    d7 <--> p11
-    p11 <--> chain
-    p11 -- "in escrow, receipts" --> d4
-```
+<p align="center"><a href="docs/diagrams/dfd-level-1a.md"><img src="docs/images/diagrams/dfd-level-1a.png" width="846" alt="Level 1 data flow diagram: accounts, organisation checks, the Passport, donations, the hourly batch, relaying and indexing"></a></p>
 
 ### 8.4 Level 1b: proof, decisions and money out
 
-```mermaid
-flowchart TB
-    classDef ext fill:#FFF4D6,stroke:#B7791F,color:#3D2A00
-    classDef proc fill:#E6FFFA,stroke:#2C7A7B,color:#0B3B3B,stroke-width:2px
-    classDef store fill:#F1F5F9,stroke:#475569,color:#0F172A
-
-    field["Field worker"]:::ext
-    org["Organisation admin"]:::ext
-    officer["Verification Officer"]:::ext
-    donor["Donor"]:::ext
-    ipfs["IPFS"]:::ext
-    bank["Partner bank"]:::ext
-
-    p6(["6.0 Capture and check evidence"]):::proc
-    p7(["7.0 Decide: officer, then donors"]):::proc
-    p8(["8.0 Release and pay"]):::proc
-
-    d3[("D3 Projects")]:::store
-    d5[("D5 Evidence")]:::store
-    d6[("D6 Decisions")]:::store
-    d7[("D7 Chain")]:::store
-    d8[("D8 Private files")]:::store
-
-    field -- "photos, GPS,<br/>signed manifest" --> p6
-    p6 -- "one-time code" --> field
-    d3 -- "site, window,<br/>proof list" --> p6
-    org -- "signature" --> p6
-    p6 -- "originals" --> d8
-    p6 <--> d5
-    p6 -- "redacted copy" --> ipfs
-    p6 -- "evidence and<br/>checks calls" --> d7
-    d5 -- "bundle, report" --> p7
-    officer -- "signed decision" --> p7
-    donor -- "signed vote" --> p7
-    p7 <--> d6
-    p7 -- "decision and<br/>vote calls" --> d7
-    d6 -- "approved milestone" --> p8
-    p8 -- "instruction" --> bank
-    bank -- "confirmation" --> p8
-    p8 -- "release, payout" --> d6
-    p8 -- "release call" --> d7
-```
+<p align="center"><a href="docs/diagrams/dfd-level-1b.md"><img src="docs/images/diagrams/dfd-level-1b.png" width="846" alt="Level 1 data flow diagram: evidence capture and checks, the officer's decision and the donor vote, release and payment"></a></p>
 
 ### 8.5 Level 1c: when a project stops, and the daily check
 
-```mermaid
-flowchart TB
-    classDef ext fill:#FFF4D6,stroke:#B7791F,color:#3D2A00
-    classDef proc fill:#E6FFFA,stroke:#2C7A7B,color:#0B3B3B,stroke-width:2px
-    classDef store fill:#F1F5F9,stroke:#475569,color:#0F172A
-
-    org["Organisation admin"]:::ext
-    officer["Verification Officer"]:::ext
-    donor["Donor"]:::ext
-    bank["Partner bank"]:::ext
-
-    p9(["9.0 Stop: refund or move"]):::proc
-    p10(["10.0 Reconcile, daily"]):::proc
-
-    d4[("D4 Money")]:::store
-    d6[("D6 Decisions")]:::store
-    d7[("D7 Chain")]:::store
-
-    org -- "withdrawal, signed" --> p9
-    officer -- "stop proposal,<br/>then a donor vote" --> p9
-    donor -- "refund or move,<br/>signed" --> p9
-    d4 -- "the donor's<br/>allocations" --> p9
-    p9 -- "claims" --> d6
-    p9 -- "refund instruction" --> bank
-    p9 -- "claim calls" --> d7
-    p9 -- "moved money,<br/>new allocations" --> d4
-    bank -- "signed balance" --> p10
-    d4 -- "ledger total" --> p10
-    d7 -- "supply on-chain" --> p10
-    p10 -- "reconciliation" --> d4
-    p10 -- "alerts" --> d7
-```
+<p align="center"><a href="docs/diagrams/dfd-level-1c.md"><img src="docs/images/diagrams/dfd-level-1c.png" width="711" alt="Level 1 data flow diagram: stopping a project with refunds or moves, and the daily reconciliation"></a></p>
 
 ### 8.6 The data stores
 
@@ -690,14 +401,7 @@ The app database is where Veritas **writes**. It is normalised (third normal for
 
 The diagrams use **crow's foot** notation. Each end of a line says how many rows can be on that side.
 
-```mermaid
-erDiagram
-    A ||--o{ B : "one A has zero or many B"
-    C ||--|{ D : "one C has one or many D"
-    E |o--o{ F : "an F has zero or one E"
-    G ||--o| H : "one G has zero or one H"
-    I ||..o{ J : "logical link, no foreign key"
-```
+<p align="center"><a href="docs/diagrams/erd-symbols.md"><img src="docs/images/diagrams/erd-symbols.png" width="846" alt="Crow's foot symbols: exactly one, zero or one, zero or many, one or many, and a logical link"></a></p>
 
 | Symbol at a line's end | Meaning |
 |---|---|
@@ -715,390 +419,29 @@ erDiagram
 
 The 41 tables fall into five areas. This map shows the areas and the keys that join them; each area is drawn in full, with crow's feet, in 10.4.
 
-```mermaid
-flowchart TB
-    classDef area fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px
-    ACC["Accounts and organisations<br/>11 tables<br/>users, charities, contractors, officers"]:::area
-    PRJ["Projects<br/>5 tables<br/>projects, passports, milestones"]:::area
-    MON["Money<br/>11 tables<br/>donations, allocations, batches,<br/>receipts, releases, payouts, claims"]:::area
-    EVD["Evidence and decisions<br/>9 tables<br/>capture_sessions, evidence_bundles,<br/>officer_decisions, ballots, votes"]:::area
-    CHN["Talking to the blockchain<br/>5 tables<br/>chain_outbox, chain_events"]:::area
-
-    ACC -- "an organisation runs projects<br/>charity_id" --> PRJ
-    PRJ -- "a project receives money<br/>project_id" --> MON
-    PRJ -- "each milestone needs proof<br/>project_id + milestone_index" --> EVD
-    ACC -- "officers sign decisions<br/>officer_id" --> EVD
-    EVD -- "an approved milestone<br/>is released" --> MON
-    MON -- "on-chain calls<br/>outbox_id" --> CHN
-    EVD -- "on-chain calls<br/>outbox_id" --> CHN
-```
+<p align="center"><a href="docs/diagrams/database-areas.md"><img src="docs/images/diagrams/database-areas.png" width="583" alt="The database's five areas and the keys that join them"></a></p>
 
 ### 10.4 Each area in full
 
 **Accounts and organisations** (11 tables)
 
-```mermaid
-erDiagram
-    users {
-        uuid id PK
-        text email UK "lower case"
-        text phone UK "+994..."
-        text password_hash "scrypt, or empty"
-        text firebase_uid UK "Google"
-        boolean is_admin
-    }
-    sessions {
-        uuid id PK
-        uuid user_id FK
-        bytea token_hash UK
-        uuid device_id FK
-        timestamptz expires_at
-    }
-    password_resets {
-        uuid id PK
-        uuid user_id FK
-        bytea token_hash UK
-        timestamptz expires_at
-    }
-    login_codes {
-        uuid id PK
-        text phone
-        bytea code_hmac
-        integer attempts
-    }
-    devices {
-        uuid id PK
-        uuid user_id FK
-        text address UK "phone key"
-        text platform
-    }
-    device_challenges {
-        uuid id PK
-        uuid user_id FK
-        uuid charity_id FK
-        text purpose
-    }
-    charities {
-        uuid id PK
-        text voen UK
-        text legal_name
-        text status
-        text signer_address UK
-        uuid created_by FK
-        uuid verified_by FK
-    }
-    charity_members {
-        uuid id PK
-        uuid charity_id FK
-        uuid user_id FK
-        text role "admin, field_worker"
-    }
-    contractors {
-        uuid id PK
-        uuid charity_id FK
-        text voen
-        text iban
-        text status
-        text registry_status
-    }
-    officers {
-        uuid id PK
-        text address UK "signing key"
-        uuid user_id FK, UK
-        text status
-    }
-    kyb_documents {
-        uuid id PK
-        text owner_type "charity, contractor"
-        uuid owner_id
-        text kind
-        bytea sha256
-    }
-    users ||--o{ sessions : "signs in with"
-    users ||--o{ password_resets : "asks for"
-    users ||--o{ devices : "registers"
-    devices |o--o{ sessions : "opened from"
-    users ||--o{ device_challenges : "answers"
-    charities |o--o{ device_challenges : "key for"
-    users ||--o{ charity_members : "is"
-    charities ||--o{ charity_members : "has"
-    charities ||--o{ contractors : "registers"
-    users |o--o| officers : "account of"
-    users ||--o{ charities : "created"
-    charities ||..o{ kyb_documents : "owner_type = charity"
-    contractors ||..o{ kyb_documents : "owner_type = contractor"
-```
+<p align="center"><a href="docs/diagrams/erd-accounts.md"><img src="docs/images/diagrams/erd-accounts.png" width="846" alt="Entity relationship diagram: users, sessions, devices, charities, members, contractors, officers and documents"></a></p>
 
 **Projects and their promises** (5 tables)
 
-```mermaid
-erDiagram
-    projects {
-        uuid id PK
-        uuid charity_id FK
-        text status "draft ... completed"
-        text category
-        bigint total_qapik "goal"
-        text escrow_address
-    }
-    passports {
-        uuid id PK
-        uuid project_id FK
-        integer version
-        text status
-        bytea sha256 "locked on-chain"
-        text cid "IPFS"
-    }
-    milestones {
-        uuid id PK
-        uuid project_id FK
-        integer index "0, 1, 2"
-        bigint amount_qapik
-        text status
-        bigint funded_qapik
-    }
-    budget_lines {
-        uuid id PK
-        uuid milestone_id FK
-        text item
-        bigint amount_qapik
-    }
-    sites {
-        uuid id PK
-        uuid milestone_id FK
-        geography geom "polygon"
-    }
-    charities ||--o{ projects : "runs"
-    projects ||--o{ passports : "versions"
-    projects ||--o{ milestones : "split into"
-    milestones ||--o{ budget_lines : "costed by"
-    milestones ||--o{ sites : "happens at"
-```
+<p align="center"><a href="docs/diagrams/erd-projects.md"><img src="docs/images/diagrams/erd-projects.png" width="696" alt="Entity relationship diagram: projects, passports, milestones, budget lines and sites"></a></p>
 
 **Money** (11 tables)
 
-```mermaid
-erDiagram
-    donations {
-        uuid id PK
-        uuid project_id FK
-        uuid user_id FK "empty for a guest"
-        text provider_payment_id UK
-        text kind
-        bigint amount_qapik
-        uuid pledge_charge_id FK
-    }
-    allocations {
-        uuid id PK
-        uuid donation_id FK
-        uuid project_id FK
-        integer milestone_index
-        text holder "donor key"
-        bytea leaf_hash UK
-        bigint amount_qapik
-        bigint batch_id FK
-    }
-    batches {
-        bigint id PK "batch number"
-        bytea root
-        bigint total_qapik
-        text status
-        bigint outbox_id FK
-    }
-    batch_leaves {
-        uuid allocation_id PK, FK
-        bigint batch_id FK
-        integer tree_index
-        jsonb proof
-    }
-    receipts {
-        uuid id PK
-        uuid project_id FK
-        text holder
-        text token_id UK
-    }
-    pledges {
-        uuid id PK
-        uuid user_id FK
-        uuid project_id FK
-        bigint amount_qapik
-        text status
-    }
-    pledge_charges {
-        uuid id PK
-        uuid pledge_id FK
-        integer milestone_index
-        integer approval_round
-        text status
-    }
-    releases {
-        uuid id PK
-        uuid project_id FK
-        integer milestone_index
-        bigint amount_qapik
-        bigint instruction_id UK
-    }
-    payouts {
-        uuid id PK
-        bigint instruction_id UK
-        uuid project_id FK
-        text kind "payout, refund"
-        bigint amount_qapik
-        text status
-    }
-    claims {
-        uuid id PK
-        uuid project_id FK
-        uuid user_id FK
-        text action "refund, redirect"
-        uuid target_project_id FK
-        bigint amount_qapik
-    }
-    reconciliations {
-        uuid id PK
-        bigint day UK
-        bigint chain_supply_qapik
-        bigint ledger_qapik
-        bigint bank_balance_qapik
-        boolean balanced
-    }
-    donations ||--|{ allocations : "split into"
-    batches |o--o{ allocations : "anchors"
-    batches ||--o{ batch_leaves : "holds"
-    allocations ||--o| batch_leaves : "placed as"
-    pledges ||--o{ pledge_charges : "charged as"
-    pledge_charges |o--o{ donations : "becomes"
-    receipts ||..o{ allocations : "project_id + holder"
-    releases ||..o| payouts : "instruction_id"
-    claims ||..o{ payouts : "claim_id, for a refund"
-```
+<p align="center"><a href="docs/diagrams/erd-money.md"><img src="docs/images/diagrams/erd-money.png" width="846" alt="Entity relationship diagram: donations, allocations, batches, receipts, pledges, releases, payouts, claims and reconciliations"></a></p>
 
 **Evidence and decisions** (9 tables)
 
-```mermaid
-erDiagram
-    capture_sessions {
-        uuid id PK
-        uuid project_id FK
-        integer milestone_index
-        integer attempt
-        text challenge_code
-        text device_address FK
-        text status
-    }
-    evidence_items {
-        uuid id PK
-        uuid session_id FK
-        text kind
-        bytea sha256
-        double latitude
-        double longitude
-        timestamptz captured_at
-    }
-    photo_hashes {
-        uuid id PK
-        uuid item_id FK, UK
-        bytea phash
-        bytea dhash
-    }
-    evidence_bundles {
-        uuid id PK
-        uuid session_id FK, UK
-        uuid project_id FK
-        bytea bundle_hash "anchored"
-        text status
-        text public_cid "IPFS"
-    }
-    evidence_checks {
-        uuid id PK
-        uuid bundle_id FK
-        integer number "1 to 11"
-        text kind "hard, advisory"
-        text status
-    }
-    check_reports {
-        uuid id PK
-        uuid bundle_id FK, UK
-        bytea sha256 "anchored"
-        boolean passed
-    }
-    officer_decisions {
-        uuid id PK
-        uuid project_id FK
-        uuid officer_id FK
-        integer milestone_index
-        boolean approve
-        boolean override_checks
-    }
-    ballots {
-        bytea id PK "id on-chain"
-        uuid project_id FK
-        text kind
-        integer eligible
-        integer yes
-        integer no
-    }
-    votes {
-        uuid id PK
-        bytea ballot_id FK
-        text holder
-        boolean approve
-    }
-    capture_sessions ||--o{ evidence_items : "collects"
-    evidence_items ||--o| photo_hashes : "fingerprinted as"
-    capture_sessions ||--o| evidence_bundles : "sealed as"
-    evidence_bundles ||--o{ evidence_checks : "checked by"
-    evidence_bundles ||--o| check_reports : "summed up in"
-    officers ||--o{ officer_decisions : "signs"
-    ballots ||--o{ votes : "collects"
-    milestones ||..o{ capture_sessions : "project_id + milestone_index"
-    milestones ||..o{ officer_decisions : "project_id + milestone_index"
-    milestones ||..o{ ballots : "project_id + milestone_index"
-```
+<p align="center"><a href="docs/diagrams/erd-evidence.md"><img src="docs/images/diagrams/erd-evidence.png" width="846" alt="Entity relationship diagram: capture sessions, evidence items, photo hashes, bundles, checks, reports, decisions, ballots and votes"></a></p>
 
 **Talking to the blockchain** (5 tables)
 
-```mermaid
-erDiagram
-    chain_outbox {
-        bigint id PK "order of calls"
-        text kind
-        text dedupe_key UK
-        text function
-        jsonb args
-        text status
-        bigint depends_on FK
-        bytea tx_hash
-    }
-    chain_events {
-        bigint id PK
-        bigint block_number
-        integer log_index
-        text event
-        jsonb args
-        uuid project_id FK
-    }
-    chain_contracts {
-        text address PK
-        text contract
-        uuid project_id FK
-        bigint from_block
-    }
-    chain_cursor {
-        text name PK
-        bigint block_number
-    }
-    alerts {
-        uuid id PK
-        text severity
-        text kind
-        text dedupe_key UK
-    }
-    chain_outbox |o--o{ chain_outbox : "waits for"
-    projects |o--o{ chain_outbox : "about"
-    projects |o--o{ chain_events : "emitted by its escrow"
-    projects |o--o{ chain_contracts : "its escrow"
-```
+<p align="center"><a href="docs/diagrams/erd-chain.md"><img src="docs/images/diagrams/erd-chain.png" width="840" alt="Entity relationship diagram: chain outbox, chain events, contracts, cursor and alerts"></a></p>
 
 Twelve tables point to `chain_outbox` through an optional `outbox_id` (or `submit_outbox_id`, `checks_outbox_id`, `close_outbox_id`): the call that records that row on-chain. Those lines are left out above so the diagrams stay readable; every one is zero-or-one to `chain_outbox`.
 
@@ -1939,143 +1282,11 @@ Five fact tables (events) share four dimension tables (descriptions). Kimball ca
 
 **Money: what came in, what went out, what came back.** The four dimensions are drawn here with all their columns.
 
-```mermaid
-erDiagram
-    dim_date {
-        integer date_key PK
-        date full_date UK
-        smallint year
-        smallint quarter
-        smallint month
-        text month_name
-        smallint iso_week
-        smallint day_of_week
-        text day_name
-        boolean is_weekend
-    }
-    dim_donor {
-        integer donor_key PK
-        uuid donor_id UK
-        text sign_in_method
-        date joined_date
-        boolean is_guest
-    }
-    dim_project {
-        integer project_key PK
-        uuid project_id UK
-        text title
-        text status
-        bigint goal_qapik
-        smallint milestone_count
-        date published_date
-        uuid organisation_id
-        text organisation_name
-        text organisation_voen
-        text contractor_name
-        text contractor_voen
-        text cause_code
-        text cause_name
-        text passport_category
-        text region_code
-        text region_name
-        text country
-        boolean is_abroad
-        text escrow_address
-    }
-    dim_milestone {
-        integer milestone_key PK
-        uuid milestone_id UK
-        smallint milestone_number
-        text title
-        bigint budget_qapik
-        date window_opens
-        date window_closes
-        text status
-    }
-    fact_donation {
-        uuid allocation_id PK
-        uuid donation_id
-        integer date_key FK
-        integer donor_key FK
-        integer project_key FK
-        integer milestone_key FK
-        text donation_kind
-        text status
-        boolean is_anchored
-        bigint amount_qapik
-    }
-    fact_release {
-        uuid release_id PK
-        integer released_date_key FK
-        integer paid_date_key FK
-        integer project_key FK
-        integer milestone_key FK
-        smallint attempt
-        text approved_by
-        bigint released_qapik
-        numeric days_evidence_to_paid
-    }
-    fact_claim {
-        uuid claim_id PK
-        integer date_key FK
-        integer donor_key FK
-        integer project_key FK
-        integer target_project_key FK
-        text action
-        boolean is_default
-        text status
-        bigint amount_qapik
-    }
-    dim_date ||--o{ fact_donation : "date"
-    dim_donor ||--o{ fact_donation : "donor"
-    dim_project ||--o{ fact_donation : "project"
-    dim_milestone ||--o{ fact_donation : "milestone"
-    dim_date ||--o{ fact_release : "released on"
-    dim_date ||--o{ fact_release : "paid on"
-    dim_project ||--o{ fact_release : "project"
-    dim_milestone ||--o{ fact_release : "milestone"
-    dim_date ||--o{ fact_claim : "date"
-    dim_donor ||--o{ fact_claim : "donor"
-    dim_project ||--o{ fact_claim : "project"
-    dim_project ||--o{ fact_claim : "target project"
-```
+<p align="center"><a href="docs/diagrams/star-money.md"><img src="docs/images/diagrams/star-money.png" width="846" alt="Star schema: fact_donation, fact_release and fact_claim with dim_date, dim_donor, dim_project and dim_milestone"></a></p>
 
 **Proof and decisions.** The same dimensions, shared (conformed), drawn as names only.
 
-```mermaid
-erDiagram
-    fact_evidence_check {
-        uuid bundle_id PK
-        smallint check_number PK
-        integer date_key FK
-        integer project_key FK
-        integer milestone_key FK
-        smallint attempt
-        text check_name
-        text check_kind
-        text result
-        boolean is_passed
-    }
-    fact_ballot {
-        text ballot_id PK
-        integer end_date_key FK
-        integer project_key FK
-        integer milestone_key FK
-        text ballot_kind
-        smallint round
-        integer eligible_count
-        integer yes_count
-        integer no_count
-        boolean is_passed
-        boolean is_turnout_fallback
-    }
-    dim_date ||--o{ fact_evidence_check : "date"
-    dim_project ||--o{ fact_evidence_check : "project"
-    dim_milestone ||--o{ fact_evidence_check : "milestone"
-    dim_date ||--o{ fact_ballot : "ends on"
-    dim_project ||--o{ fact_ballot : "project"
-    dim_milestone ||--o{ fact_ballot : "milestone"
-```
+<p align="center"><a href="docs/diagrams/star-proof.md"><img src="docs/images/diagrams/star-proof.png" width="755" alt="Star schema: fact_evidence_check and fact_ballot with the shared dimensions"></a></p>
 
 ### 11.4 Reading it
 
