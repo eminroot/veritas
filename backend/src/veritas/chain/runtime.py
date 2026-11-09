@@ -29,6 +29,8 @@ class Chain:
         w3 = Web3(Web3.HTTPProvider(rpc_url, request_kwargs={"timeout": 30}))
         # Polygon's blocks carry more extra data than Ethereum's; web3 needs telling.
         w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
+        # No call of ours follows an EIP-3668 OffchainLookup: a contract could name any URL.
+        w3.provider.global_ccip_read_enabled = False
         return cls.of(Contracts(w3, deployment))
 
     @classmethod

