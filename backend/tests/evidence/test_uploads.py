@@ -295,6 +295,44 @@ def test_a_revoked_key_closes_its_session_and_frees_the_milestone(
     assert response.status_code == 201, response.text
 
 
+@pytest.mark.parametrize(
+    "junk", [b"\xff\xfe\x00\x04ok\x00", b"\xff\xff\xd0\x00"], ids=["stray byte", "restart"]
+)
+def test_scans_hidden_behind_bytes_the_decoder_skips_still_count(junk):
+    """libjpeg skips a stray byte, or a fill byte and a restart marker, between segments and
+    decodes the scans after them, so the scan limit counts those scans too."""
+    data = progressive(scene(72))
+    last, end = data.rindex(bytes([0xFF, 0xDA])), data.rindex(bytes([0xFF, 0xD9]))
+    hidden = data[:end] + junk + data[last:end] * 70 + data[end:]
+    with pytest.raises(PhotoError, match="scans"):
+        open_photo(hidden, "image/jpeg")
+
+
+def test_an_upload_that_finds_every_decoder_busy_is_told_to_come_back(
+    client, clock, session, field_worker, monkeypatch
+):
+    """Waiting for a decoder holds one of the API's worker threads, so the wait is short and
+    the upload is sent away rather than queued behind slow photos."""
+    from veritas.evidence import intake as intake_module
+    from veritas.evidence import photos as photos_module
+
+    monkeypatch.setattr(photos_module, "DECODE_WAIT_SECONDS", 0.1)
+    capture = Capture("photo", photo(73), clock.now)
+    held = 0
+    while intake_module.DECODING.acquire(blocking=False):
+        held += 1
+    try:
+        response = upload(client, field_worker, session["id"], capture)
+    finally:
+        for _ in range(held):
+            intake_module.DECODING.release()
+    assert response.status_code == 503, response.text
+    assert response.json()["error"]["code"] == "photos_busy"
+    assert response.headers["Retry-After"] == "60"
+    response = upload(client, field_worker, session["id"], capture)
+    assert response.status_code == 201, response.text
+
+
 def chunk(kind: bytes, data: bytes) -> bytes:
     """A PNG chunk with its length and CRC."""
     return len(data).to_bytes(4, "big") + kind + data + zlib.crc32(kind + data).to_bytes(4, "big")

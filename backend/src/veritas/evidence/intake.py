@@ -40,6 +40,7 @@ from veritas.db.models.evidence import (
     EvidenceItem,
     PhotoHash,
 )
+from veritas.evidence import photos
 from veritas.evidence.manifest import (
     MAX_ITEMS,
     Manifest,
@@ -65,6 +66,7 @@ from veritas.services.errors import (
     Forbidden,
     NotFound,
     PayloadTooLarge,
+    Unavailable,
     Unprocessable,
     UnsupportedMediaType,
 )
@@ -193,12 +195,21 @@ def prepare(
         )
     hashes = None
     if upload.kind == ProofKind.PHOTO:
+        # A few at a time: each photo may take hundreds of megabytes. Waiting holds one of the
+        # API's worker threads, so an upload that finds them all busy is sent away.
+        if not DECODING.acquire(timeout=photos.DECODE_WAIT_SECONDS):
+            raise Unavailable(
+                "photos_busy",
+                "The server is reading other photos right now; upload this one again in a minute.",
+                headers={"Retry-After": "60"},
+            )
         try:
-            with DECODING:  # a few at a time: each photo may take hundreds of megabytes
-                image = open_photo(upload.data, upload.content_type, max_side=HASH_SIDE)
-                hashes = perceptual_hashes(image)
+            image = open_photo(upload.data, upload.content_type, max_side=HASH_SIDE)
+            hashes = perceptual_hashes(image)
         except PhotoError as exc:
             raise Unprocessable("unreadable_photo", f"The photo cannot be used: {exc}.") from None
+        finally:
+            DECODING.release()
     return Prepared(upload=upload, digest=digest, hashes=hashes)
 
 

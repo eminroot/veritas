@@ -8,7 +8,8 @@ number of progressive JPEG scans (each one is another pass over every pixel), an
 (a camera photo is never a thin line). Both read the picture's own markers and chunks, so
 data after it, like a phone's motion clip, changes nothing. A large JPEG can be decoded at a
 reduced scale, which is all the hashes and the public copy need, and the API decodes only a
-few uploads at a time.
+few uploads at a time; an upload that cannot get a decoder within seconds is told to come
+back rather than left holding a worker thread.
 
 Photos are turned upright first, from the EXIF orientation tag alone: the rest of the EXIF is
 never rewritten, so a damaged tag elsewhere cannot make a portrait photo unusable. A JPEG
@@ -48,6 +49,9 @@ MARKER = bytes([0xFF])
 
 DECODING = threading.BoundedSemaphore(2)
 """How many uploaded photos one process decodes at once."""
+DECODE_WAIT_SECONDS = 3.0
+"""How long an upload waits for a free decoder before the API answers that it is busy. The
+wait holds one of the API's worker threads, so it must stay short."""
 
 FORMATS = {"image/jpeg": ("JPEG", "MPO"), "image/png": ("PNG",)}
 TURNS = {
@@ -128,7 +132,11 @@ def _jpeg_scans(data: bytes) -> tuple[int, int]:
     i, end = 2, len(data)
     while i + 4 <= end:
         if data[i] != 0xFF:
-            break  # not a marker: the decoder will refuse the file
+            # Not a marker where one should be. libjpeg skips such bytes and reads on, so
+            # scans could hide behind them: count every scan marker left in the file instead,
+            # which can only count too many.
+            scans += data.count(b"\xff\xda", i)
+            break
         marker = data[i + 1]
         if marker == 0xFF:  # a fill byte before a marker
             i += 1
