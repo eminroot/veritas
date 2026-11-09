@@ -4,7 +4,9 @@ How we get from the design in [ARCHITECTURE.md](../ARCHITECTURE.md) to a working
 
 ## Where things stand
 
-Phase 1 is built and passes 152 tests locally; it is done once its first CI run on GitHub is green. Phase 2, the contracts, is next. Nothing runs end to end yet.
+Phase 1 is done: its CI run on GitHub is green. Phases 2 to 6 and 8 are built and pass locally: 74 Foundry tests, and 563 backend tests against PostgreSQL 17 with PostGIS and a local Anvil chain. Those include end-to-end flows that take a card payment, through evidence captured on a phone and checked, all the way to the contractor's payout, and a stopped project back to every donor as refunds and redirects. Each of these phases is done once CI runs its tests green on GitHub; the workflows for the contracts and for the backend with PostGIS and Anvil are in `.github/workflows`.
+
+Phase 7, AI and documents, is next. Until it lands, the evidence report marks the challenge-code, deliverable, invoice, e-kassa, VÖEN and AI-image checks as not run, and the officer reviews those items by hand. Photos stay out of the public copy of evidence until the server has a face and number plate detector: OpenCV 5, which the backend installs, no longer ships the Haar cascades the default detector uses. Even with one, a photo goes public only once the charity admin who signs the bundle confirms it shows no face or plate. App Attest and Play Integrity are not built yet either, so in production every bundle fails the attestation check for now. A live escrow keeps the charity key it was launched with; replacing a lost one is an open question in ARCHITECTURE.md. Nothing is deployed to Amoy yet.
 
 ## Ground rules
 
@@ -35,56 +37,56 @@ Done when CI is green and the example Passport always produces the same hash.
 
 ## Phase 2: Contracts
 
-- [ ] Foundry project with OpenZeppelin Contracts 5
-- [ ] `vAZN` with bank-signed mint and burn, transfers limited to Veritas contracts
-- [ ] `PassportRegistry`, `EscrowFactory` and `MilestoneEscrow` clones with the milestone state machine
-- [ ] `DonationLedger` for hourly batch roots
-- [ ] `VotingModule` with EIP-712 votes, Merkle eligibility proofs, turnout and fallback rules
-- [ ] `ReceiptToken` (ERC-721 plus ERC-5192 lock) and key rotation with a 48 hour delay
-- [ ] `BankPayoutVault`, payout confirmation and failed payout handling
-- [ ] Stop, refund and redirect
-- [ ] EIP-712 message definitions shared with Python, with digests checked on both sides
-- [ ] Unit and fuzz tests, deploy scripts for Anvil and Amoy
+- [x] Foundry project with OpenZeppelin Contracts 5
+- [x] `vAZN` with bank-signed mint and burn, transfers limited to Veritas contracts
+- [x] `PassportRegistry`, `EscrowFactory` and `MilestoneEscrow` clones with the milestone state machine
+- [x] `DonationLedger` for hourly batch roots
+- [x] `VotingModule` with EIP-712 votes, Merkle eligibility proofs, turnout and fallback rules
+- [x] `ReceiptToken` (ERC-721 plus ERC-5192 lock) and key rotation with a 48 hour delay
+- [x] `BankPayoutVault`, payout confirmation and failed payout handling
+- [x] Stop, refund and redirect
+- [x] EIP-712 message definitions shared with Python, with digests checked on both sides
+- [x] Unit and fuzz tests, deploy scripts for Anvil and Amoy
 
 Done when a whole milestone (create, fund, evidence, decision, vote, release, payout) passes in Foundry tests and messages signed in Python verify on-chain.
 
 ## Phase 3: Database and API skeleton
 
-- [ ] SQLAlchemy models and Alembic migrations for the tables in ARCHITECTURE.md section 10
-- [ ] FastAPI app: settings, error format, health check, OpenAPI
-- [ ] Phone OTP login (codes printed to the log in dev), device key registration
-- [ ] Charity and contractor onboarding records (KYB fields, documents)
-- [ ] Passport drafts, validation errors a person can read, publishing with stored canonical bytes
-- [ ] Tests against a real PostgreSQL with PostGIS
+- [x] SQLAlchemy models and Alembic migrations for the tables in ARCHITECTURE.md section 10
+- [x] FastAPI app: settings, error format, health check, OpenAPI
+- [x] Phone OTP login (codes printed to the log in dev), device key registration
+- [x] Charity and contractor onboarding records (KYB fields, documents)
+- [x] Passport drafts, validation errors a person can read, publishing with stored canonical bytes
+- [x] Tests against a real PostgreSQL with PostGIS
 
 Done when a charity can draft and publish a Passport through the API and the stored bytes hash to the published value.
 
 ## Phase 4: Chain plumbing
 
-- [ ] ABIs exported from the Foundry build into the backend
-- [ ] `chain_outbox` and the relayer: one lock, nonce handling, fee bumps, finality, retries
-- [ ] Indexer: finalised blocks only, `chain_events`, status updates, alerts on mismatches
-- [ ] Integration tests against Anvil
+- [x] ABIs exported from the Foundry build into the backend
+- [x] `chain_outbox` and the relayer: one lock, nonce handling, fee bumps, finality, retries
+- [x] Indexer: finalised blocks only, `chain_events`, status updates, alerts on mismatches
+- [x] Integration tests against Anvil
 
 Done when publishing a Passport ends with an on-chain project whose events show up in PostgreSQL.
 
 ## Phase 5: Money in
 
-- [ ] Mock card provider: signed webhooks, saved cards, merchant-initiated charges, refunds
-- [ ] MockBank: escrow account, its own signing key, statements
-- [ ] Donation intake: signature check, second lookup, exactly-once insert, allocation leaves
-- [ ] Hourly batch: tree, bank attestation, anchoring, receipt tokens, donor proofs
-- [ ] Daily reconciliation and the automatic release freeze
+- [x] Mock card provider: signed webhooks, saved cards, merchant-initiated charges, refunds
+- [x] MockBank: escrow account, its own signing key, statements
+- [x] Donation intake: signature check, second lookup, exactly-once insert, allocation leaves
+- [x] Hourly batch: tree, bank attestation, anchoring, receipt tokens, donor proofs
+- [x] Daily reconciliation and the automatic release freeze
 
 Done when a demo card payment becomes an "in escrow" receipt whose Merkle proof verifies on-chain.
 
 ## Phase 6: Evidence
 
-- [ ] Capture sessions with one-time challenge codes
-- [ ] Upload API, private storage, manifest signatures, app attestation (mocked in dev)
-- [ ] Deterministic checks: hashes, geofence, time window, photo reuse with pHash and dHash
-- [ ] Redaction and IPFS publishing through Kubo
-- [ ] Check report, its hash and anchoring
+- [x] Capture sessions with one-time challenge codes
+- [x] Upload API, private storage, manifest signatures, app attestation (mocked in dev)
+- [x] Deterministic checks: hashes, geofence, time window, photo reuse with pHash and dHash
+- [x] Redaction and IPFS publishing through Kubo
+- [x] Check report, its hash and anchoring
 
 Done when an evidence bundle goes from upload to an anchored report, and every failed check says why.
 
@@ -100,11 +102,11 @@ Done when the reports for the sample bundles match the hand-labelled expectation
 
 ## Phase 8: Decisions and payouts
 
-- [ ] Officer review and signed decisions, including overrides with a reason
-- [ ] Ballots and votes with Merkle eligibility proofs
-- [ ] Release instruction, MockBank payout, confirmation and burn
-- [ ] Pay-on-Proof charges after an approval
-- [ ] Stop, refund and redirect from the API
+- [x] Officer review and signed decisions, including overrides with a reason
+- [x] Ballots and votes with Merkle eligibility proofs
+- [x] Release instruction, MockBank payout, confirmation and burn
+- [x] Pay-on-Proof charges after an approval
+- [x] Stop, refund and redirect from the API
 
 Done when the demo runs from a donation to a contractor payout, and a stopped project returns or moves every donor's money.
 
