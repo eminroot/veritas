@@ -1,0 +1,176 @@
+/* A project in a portfolio (/portfolio/:id and /organisation/projects/:id) and the export menu.
+   Inside the console's frame, so it uses its tokens (--ink, --pg, --lime, ...). */
+
+/* ---------------------------------------------------------------- export menu */
+
+.pf-export { position: relative; display: inline-flex; flex-direction: column; align-items: flex-end; }
+.pf-export__chev { width: 14px !important; height: 14px !important; margin-left: -2px; opacity: 0.6; }
+.pf-export__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 290px;
+  padding: 6px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow-pop), 0 0 0 1px var(--ink-07);
+  animation: pf-pop 0.16s ease-out;
+}
+.pf-export__menu button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.pf-export__menu button:hover,
+.pf-export__menu button:focus-visible { background: var(--pg); outline: none; }
+.pf-export__menu span:last-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pf-export__menu b { font-weight: 500; font-size: 14px; }
+.pf-export__menu em { font-style: normal; font-size: 12px; color: var(--ink-50); }
+.pf-export__ico { display: grid; place-items: center; flex: 0 0 auto; width: 36px; height: 36px; border-radius: 11px; background: var(--dark); color: #fff; }
+.pf-export__ico--xl { background: var(--lime); color: var(--ink); }
+.pf-export__ico svg { width: 17px; height: 17px; }
+.pf-export__err { position: absolute; top: calc(100% + 6px); right: 0; width: max-content; max-width: 260px; font-size: 12.5px; color: #a4433a; }
+.pf-spinner { width: 15px; height: 15px; border: 2px solid var(--ink-25); border-top-color: var(--ink); border-radius: 50%; animation: pf-spin 0.7s linear infinite; }
+@keyframes pf-spin { to { transform: rotate(360deg); } }
+@keyframes pf-pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ---------------------------------------------------------------- the donor's money, per milestone */
+
+.pf-money { display: flex; flex-direction: column; }
+.pf-money__head,
+.pf-money__row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) repeat(3, minmax(0, 0.9fr)) minmax(0, 1.1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px 6px;
+}
+.pf-money__head { font-size: 12px; color: var(--ink-50); border-bottom: 1px solid var(--ink-07); }
+.pf-money__row { border-bottom: 1px solid var(--ink-07); font-size: 14px; }
+.pf-money__row:last-child { border-bottom: 0; }
+.pf-money__row.is-mine { background: linear-gradient(90deg, rgba(217, 255, 92, 0.22), transparent 70%); border-radius: 12px; }
+.pf-money__ms { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pf-money__ms > span:last-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pf-money__ms b { font-weight: 400; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-money__ms em { font-style: normal; font-size: 12px; color: var(--ink-50); }
+.pf-num { display: grid; place-items: center; flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; background: var(--pg); font-size: 12px; color: var(--ink-75); }
+.pf-num svg { width: 14px; height: 14px; }
+.pf-num--paid { background: var(--dark); color: #fff; }
+.pf-num--stopped { background: var(--clay); color: var(--ink); }
+.pf-money__row .tnum { text-align: right; font-variant-numeric: tabular-nums; }
+.pf-money__head span:nth-child(n + 2):nth-child(-n + 4) { text-align: right; }
+.pf-money__mine b { font-weight: 500; }
+.pf-money__mine em { display: block; font-style: normal; font-size: 12px; color: var(--ink-50); }
+.pf-money__status { display: flex; justify-content: flex-end; }
+
+.pf-gifts { display: flex; flex-direction: column; margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--ink-07); }
+.pf-gifts li { display: flex; align-items: center; gap: 14px; padding: 10px 6px; font-size: 13.5px; color: var(--ink-75); border-bottom: 1px solid var(--ink-07); flex-wrap: wrap; }
+.pf-gifts li:last-child { border-bottom: 0; }
+.pf-gifts li > b { font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; margin-left: auto; }
+.pf-gifts__label { font-size: 12px; color: var(--ink-50); padding: 10px 6px 2px; }
+.pf-gifts__receipt { font-family: var(--mono); font-size: 11.5px; color: var(--ink-50); }
+
+/* A project row in a portfolio list, with the donor's own amount on the right. */
+.pf-mine { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; color: var(--ink-50); white-space: nowrap; }
+.pf-mine b { font-size: 15px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- proof and votes, per milestone */
+
+.pf-rule { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; margin-bottom: 14px; border-radius: 14px; background: var(--pg); font-size: 13px; line-height: 1.5; color: var(--ink-75); }
+.pf-rule svg { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 2px; color: var(--ink); }
+
+.pf-stack { display: flex; flex-direction: column; gap: 12px; }
+.pf-ms { border: 1px solid var(--ink-07); border-radius: 18px; background: var(--card); overflow: hidden; }
+.pf-ms__head { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+.pf-ms__title { flex: 1; min-width: 0; }
+.pf-ms__title h3 { margin: 0; font-size: 15.5px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.3; }
+.pf-ms__title p { margin: 3px 0 0; font-size: 12.5px; color: var(--ink-50); }
+.pf-ms__mine { margin-left: auto; text-align: right; font-size: 12px; color: var(--ink-50); white-space: nowrap; }
+.pf-ms__mine b { display: block; font-size: 15px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.pf-ms__quiet { margin: 0; padding: 0 16px 14px 58px; font-size: 13px; line-height: 1.5; color: var(--ink-50); }
+
+.pf-ms__body { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); border-top: 1px solid var(--ink-07); }
+.pf-ms__body > section { padding: 14px 16px 16px; min-width: 0; }
+.pf-ms__body > section + section { border-left: 1px solid var(--ink-07); }
+.pf-ms h4 { display: flex; align-items: center; gap: 7px; margin: 0 0 10px; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-50); }
+.pf-ms h4 svg { width: 14px; height: 14px; }
+
+.pf-docs { display: flex; flex-direction: column; }
+.pf-docs li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 0; border-bottom: 1px dashed var(--ink-07); }
+.pf-docs li:last-child { border-bottom: 0; }
+.pf-docs__ico { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--pg); color: var(--ink-75); }
+.pf-docs__ico svg { width: 15px; height: 15px; }
+.pf-docs li > span:nth-child(2) { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pf-docs b { font-weight: 500; font-size: 13.5px; color: var(--ink); }
+.pf-docs__side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.pf-docs em { font-style: normal; font-size: 12.5px; color: var(--ink-50); line-height: 1.4; }
+
+.pf-hash { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 0; border: 0; background: none; color: var(--ink-50); font: inherit; cursor: pointer; }
+.pf-hash small { flex: 0 0 auto; font-size: 11px; color: var(--ink-50); }
+.pf-hash code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 11.5px; color: var(--ink-75); }
+.pf-hash svg { width: 12px; height: 12px; flex: 0 0 auto; }
+.pf-hash:hover code { color: var(--ink); }
+
+.pf-checks { margin-top: 10px; border-radius: 12px; background: var(--pg); }
+.pf-checks summary { display: flex; align-items: center; gap: 8px; padding: 10px 12px; font-size: 13px; color: var(--ink); cursor: pointer; list-style: none; }
+.pf-checks summary::-webkit-details-marker { display: none; }
+.pf-checks summary svg { width: 15px; height: 15px; flex: 0 0 auto; }
+.pf-checks summary em { margin-left: auto; font-style: normal; font-size: 12px; color: var(--ink-50); }
+.pf-checks ol { display: flex; flex-direction: column; gap: 6px; padding: 0 12px 12px; }
+.pf-checks li { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: start; font-size: 12.5px; line-height: 1.4; color: var(--ink-75); }
+.pf-checks li svg { width: 14px; height: 14px; margin-top: 1px; }
+.pf-checks li.is-passed svg { color: #4a7c33; }
+.pf-checks li.is-running svg,
+.pf-checks li.is-waiting svg { color: var(--ink-50); }
+.pf-checks li small { font-size: 11px; color: var(--ink-50); white-space: nowrap; }
+
+.pf-officer { display: flex; gap: 10px; margin-top: 12px; font-size: 13px; line-height: 1.5; color: var(--ink-75); }
+.pf-officer svg { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 2px; color: var(--ink); }
+.pf-officer q { color: var(--ink); }
+
+.pf-ballot__q { margin: 0 0 12px; font-size: 13.5px; line-height: 1.45; color: var(--ink); }
+.pf-ballot__bar { display: flex; height: 10px; overflow: hidden; border-radius: 999px; background: var(--clay); }
+.pf-ballot__bar i { display: block; height: 100%; background: var(--dark); }
+.pf-ballot__nums { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 12.5px; color: var(--ink-75); }
+.pf-ballot__nums b { font-weight: 500; color: var(--ink); }
+.pf-ballot__facts { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; font-size: 12.5px; color: var(--ink-50); }
+.pf-ballot__facts span { display: flex; justify-content: space-between; gap: 10px; }
+.pf-ballot__facts b { font-weight: 400; color: var(--ink); text-align: right; }
+.pf-you { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 9px 11px; border-radius: 12px; background: var(--pg); font-size: 13px; color: var(--ink); }
+.pf-you svg { width: 15px; height: 15px; flex: 0 0 auto; }
+.pf-you--yes { background: rgba(217, 255, 92, 0.55); }
+.pf-none { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-50); }
+
+.pf-stop { display: flex; gap: 12px; padding: 14px 16px; border-radius: 16px; background: rgba(224, 197, 182, 0.35); font-size: 13.5px; line-height: 1.5; color: var(--ink-75); }
+.pf-stop svg { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 2px; color: var(--ink); }
+.pf-stop b { font-weight: 500; color: var(--ink); }
+
+@media (max-width: 860px) {
+  .pf-ms__body { grid-template-columns: minmax(0, 1fr); }
+  .pf-ms__body > section + section { border-left: 0; border-top: 1px solid var(--ink-07); }
+  .pf-money__head { display: none; }
+  .pf-money__row { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
+  .pf-money__row > :nth-child(n + 2):nth-child(-n + 3) { display: none; }
+  .pf-money__row > .pf-money__mine-cell:nth-child(4) { grid-column: 2; grid-row: 1; text-align: right; }
+  .pf-money__status { grid-column: 1 / -1; justify-content: flex-start; padding-left: 40px; }
+  .pf-ms__quiet { padding-left: 16px; }
+}
+@media (max-width: 560px) {
+  .pf-ms__head { flex-wrap: wrap; }
+  .pf-ms__mine { width: 100%; margin-left: 42px; text-align: left; }
+  .pf-docs li { grid-template-columns: 30px minmax(0, 1fr); }
+  .pf-docs li > :last-child { grid-column: 2; }
+  .pf-export__menu { width: min(290px, calc(100vw - 32px)); }
+}
