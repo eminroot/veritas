@@ -11,6 +11,7 @@ from veritas.db.models.accounts import (
     Device,
     DeviceChallenge,
     LoginCode,
+    PasswordReset,
     Platform,
     User,
 )
@@ -63,6 +64,7 @@ __all__ = [
     "OwnerType",
     "PassportStatus",
     "PassportVersion",
+    "PasswordReset",
     "Platform",
     "Project",
     "ProjectStatus",

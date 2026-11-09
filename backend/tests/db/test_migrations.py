@@ -36,7 +36,7 @@ def test_upgrade_downgrade_upgrade(scratch_database):
     url, config = scratch_database.url, scratch_database.alembic
     command.upgrade(config, "head")
     assert tables(url) == ours() | POSTGIS | {"alembic_version"}
-    assert scalar(url, "SELECT version_num FROM alembic_version") == "0003"
+    assert scalar(url, "SELECT version_num FROM alembic_version") == "0004"
     assert scalar(url, "SELECT postgis_version()").startswith("3.")
 
     command.downgrade(config, "base")

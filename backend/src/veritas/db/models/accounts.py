@@ -1,7 +1,10 @@
 """People who log in, their sessions and the keys on their phones.
 
-Login codes and session tokens are stored only as hashes, so a copy of the
-database is not a way to log in.
+The app logs in with a code sent to a phone. The web app's accounts log in with an email and a
+password, checked here, or with Google through Firebase. An account has at least one way in.
+
+Login codes, passwords, reset links and session tokens are stored only as hashes, so a copy of
+the database is not a way to log in.
 """
 
 from __future__ import annotations
@@ -41,15 +44,54 @@ class User(UUIDPrimaryKey, Timestamps, Base):
     __table_args__ = (
         az_phone("phone"),
         CheckConstraint("recovery_failures >= 0", name="recovery_failures_not_negative"),
+        CheckConstraint("password_failures >= 0", name="password_failures_not_negative"),
+        CheckConstraint(
+            "phone IS NOT NULL OR password_hash IS NOT NULL OR firebase_uid IS NOT NULL",
+            name="has_a_login",
+        ),
+        CheckConstraint("password_hash IS NULL OR email IS NOT NULL", name="password_needs_email"),
+        CheckConstraint("email = lower(email)", name="email_lower_case"),
     )
 
-    phone: Mapped[str] = mapped_column(unique=True)
+    phone: Mapped[str | None] = mapped_column(unique=True)
+    """For logging in with a code sent to it, in the app. Unset for accounts made on the web."""
+    email: Mapped[str | None] = mapped_column(unique=True)
+    """Lower case. Password logins use it, and the links to set a new password go to it."""
+    password_hash: Mapped[str | None]
+    """scrypt, as veritas.services.passwords writes it. Unset: no password login."""
+    password_failures: Mapped[int] = mapped_column(default=0, server_default=text("0"))
+    """Wrong passwords since the last right one."""
+    password_locked_until: Mapped[datetime | None]
+    firebase_uid: Mapped[str | None] = mapped_column(unique=True)
+    """The Google account, through Firebase, that signs in to this account."""
     display_name: Mapped[str | None]
     is_admin: Mapped[bool] = mapped_column(default=False, server_default=false())
     """A Veritas staff member who reviews charities, contractors and officers."""
     recovery_failures: Mapped[int] = mapped_column(default=0, server_default=text("0"))
     """Wrong answers given to recover a receipt after a lost phone, across all of the
     account's receipts: the answer is a card the account paid with, so it is one secret."""
+
+    @property
+    def has_password(self) -> bool:
+        return self.password_hash is not None
+
+    @property
+    def has_google(self) -> bool:
+        return self.firebase_uid is not None
+
+
+class PasswordReset(UUIDPrimaryKey, CreatedAt, Base):
+    """A link to set a new password, sent by email. Only the token's SHA-256 is kept."""
+
+    __tablename__ = "password_resets"
+    __table_args__ = (byte_length("token_hash", 32),)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    token_hash: Mapped[bytes] = mapped_column(unique=True)
+    expires_at: Mapped[datetime]
+    used_at: Mapped[datetime | None]
 
 
 class LoginCode(UUIDPrimaryKey, CreatedAt, Base):

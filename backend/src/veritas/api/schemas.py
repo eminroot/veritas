@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, PlainSerializer
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, PlainSerializer
 
 from veritas.core.hashing import to_hex
 from veritas.core.identifiers import normalize_az_iban, normalize_az_phone
@@ -36,6 +36,12 @@ Iban = Annotated[
 Email = Annotated[
     str, Field(max_length=254, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$", examples=["info@example.az"])
 ]
+AccountEmail = Annotated[
+    str,
+    BeforeValidator(lambda value: value.strip().lower() if isinstance(value, str) else value),
+    Field(max_length=254, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$", examples=["aysel@example.az"]),
+]
+"""An account's email: compared and kept in lower case, so one address is one account."""
 Website = Annotated[str, Field(max_length=200, pattern=r"^https?://\S+$")]
 Nonce = Annotated[str, Field(min_length=1, max_length=64)]
 Signature = Annotated[
@@ -55,7 +61,10 @@ def signature_bytes(signature: str) -> bytes:
 
 class UserOut(Output):
     id: uuid.UUID
-    phone: str
+    phone: str | None
+    email: str | None
+    has_password: bool
+    has_google: bool
     display_name: str | None
     is_admin: bool
     created_at: datetime

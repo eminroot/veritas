@@ -113,7 +113,8 @@ class MemberIn(Input):
 
 class MemberOut(BaseModel):
     user_id: uuid.UUID
-    phone: str
+    phone: str | None
+    email: str | None
     display_name: str | None
     role: str
     added_at: datetime
@@ -307,6 +308,7 @@ def _member(member: CharityMember, person: User) -> MemberOut:
     return MemberOut(
         user_id=person.id,
         phone=person.phone,
+        email=person.email,
         display_name=person.display_name,
         role=member.role,
         added_at=member.created_at,

@@ -12,11 +12,13 @@ from contextlib import asynccontextmanager
 
 import httpx
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from veritas import __version__
 from veritas.api.errors import ErrorResponse, install_error_handlers
 from veritas.api.limits import BodyLimitMiddleware
 from veritas.api.routes import (
+    assistant,
     auth,
     charities,
     contractors,
@@ -34,12 +36,17 @@ from veritas.chain.contracts import Deployment
 from veritas.chain.runtime import Chain
 from veritas.db.session import make_engine, make_session_factory
 from veritas.payments.clients import BankClient, PspClient
+from veritas.services.firebase import GoogleKeys
 from veritas.settings import Settings, get_settings
 from veritas.storage import LocalStorage
 
 TAGS = [
     {"name": "health", "description": "Liveness and readiness checks."},
-    {"name": "auth", "description": "Login with a one-time code sent to a phone."},
+    {
+        "name": "auth",
+        "description": "Login with a code sent to a phone (the app), or in the web app with an "
+        "email and a password, or with Google through Firebase.",
+    },
     {"name": "account", "description": "The caller's own account."},
     {"name": "devices", "description": "Keys on users' phones, proven by signing a challenge."},
     {
@@ -60,13 +67,17 @@ TAGS = [
         "name": "decisions",
         "description": "Officer decisions, donor votes, pledges, stopping a project and claims.",
     },
+    {
+        "name": "assistant",
+        "description": "Questions about Veritas, answered by an OpenAI model. Rate-limited.",
+    },
 ]
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
-    if settings.otp_echo:
-        _show_login_codes()
+    if settings.otp_echo or settings.mail_echo:
+        _show_echoed_messages()
 
     engine = make_engine(settings.database_url)
 
@@ -95,6 +106,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         httpx.Client(base_url=settings.bank_base_url, timeout=15),
         settings.bank_api_key.get_secret_value(),
     )
+    app.state.google_keys = GoogleKeys(settings.firebase_keys_url)
     app.state.chain = (
         Chain.connect(settings.chain_rpc_url, Deployment.load(settings.deployment_file))
         if settings.chain_enabled
@@ -102,6 +114,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
 
     app.add_middleware(BodyLimitMiddleware, max_file_bytes=settings.max_upload_bytes)
+    if settings.cors_origins:
+        # Bearer tokens, not cookies: no credentials, and only the headers the web app sends.
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors_origins,
+            allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+            allow_headers=["Authorization", "Content-Type"],
+            max_age=600,
+        )
     install_error_handlers(app)
     routers = (
         health,
@@ -116,17 +137,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         receipts,
         evidence,
         decisions,
+        assistant,
     )
     for module in routers:
         app.include_router(module.router)
     return app
 
 
-def _show_login_codes() -> None:
-    """Make sure echoed login codes reach the console.
+def _show_echoed_messages() -> None:
+    """Make sure echoed login codes and emails reach the console.
 
-    Uvicorn sets up only its own loggers, so an INFO record from veritas.auth would
-    otherwise be dropped. When something else already configured logging, leave it.
+    Uvicorn sets up only its own loggers, so an INFO record from veritas.auth or
+    veritas.mail would otherwise be dropped. When something else already configured
+    logging, leave it.
     """
     logger = logging.getLogger("veritas")
     if logger.level == logging.NOTSET:

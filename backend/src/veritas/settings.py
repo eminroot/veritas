@@ -42,6 +42,45 @@ class Settings(BaseSettings):
     """Log login codes, so a developer can log in before SMS exists. Never in production."""
 
     session_ttl_days: int = Field(default=30, ge=1, le=365)
+
+    # The web app's accounts: an email and a password, checked here.
+    password_max_failures: int = Field(default=10, ge=3, le=100)
+    """Wrong passwords in a row before the account refuses password logins for a while."""
+    password_lock_minutes: int = Field(default=15, ge=1, le=24 * 60)
+    password_reset_ttl_minutes: int = Field(default=30, ge=5, le=24 * 60)
+    password_resets_per_hour: int = Field(default=5, ge=1, le=100)
+    """Links to set a new password one account can be sent in an hour."""
+
+    # Email, for the links to set a new password. Sent through SMTP when smtp_host is set.
+    smtp_host: str | None = None
+    smtp_port: int = Field(default=587, ge=1, le=65535)
+    """587 upgrades the connection with STARTTLS; 465 is TLS from the start."""
+    smtp_starttls: bool = True
+    smtp_username: str | None = None
+    smtp_password: SecretStr | None = None
+    mail_from: str = "Veritas <no-reply@localhost>"
+    mail_echo: bool = False
+    """Write emails to the log instead of sending them, so a developer can follow their links.
+    Never in production."""
+    demo_login: bool = False
+    """Let anyone sign in to the shared demo accounts, a donor and a verified organisation,
+    from the web app's "Try the demo" buttons, with no password (POST /v1/auth/demo). For a
+    demo site only, never one with real donors."""
+    web_app_url: str = "http://localhost:8080"
+    """Where the web app is: the links in emails point there."""
+
+    # "Continue with Google" in the web app: Firebase signs the person in with Google, and the
+    # web app trades the Firebase ID token for a session here.
+    firebase_project_id: str | None = None
+    """The Firebase project the web app's Google sign-in uses. Unset: Google sign-in is refused."""
+    firebase_keys_url: str = (
+        "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
+    )
+    """Where Google publishes the keys that sign Firebase ID tokens, as a JWKS."""
+    cors_origins: list[str] = Field(default_factory=list)
+    """Origins allowed to call the API from a browser, for a web app served from another
+    origin, e.g. ["https://veritas.az"]. Empty: same origin only, which is how the dev server
+    and nginx serve it (they pass /v1 through)."""
     key_challenge_ttl_seconds: int = Field(default=600, ge=60, le=3600)
     max_upload_bytes: int = Field(default=20 * 1024 * 1024, ge=1)
 
@@ -108,6 +147,8 @@ class Settings(BaseSettings):
             return self
         if self.otp_echo:
             raise ValueError("VERITAS_OTP_ECHO must be off in production, it writes codes to logs")
+        if self.mail_echo:
+            raise ValueError("VERITAS_MAIL_ECHO must be off in production, it writes links to logs")
         key = self.secret_key.get_secret_value() if self.secret_key else ""
         if len(key) < 32 or key == _DEV_SECRET_KEY:
             raise ValueError("VERITAS_SECRET_KEY must be set in production, 32 characters or more")
