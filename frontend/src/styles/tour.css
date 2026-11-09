@@ -1,0 +1,370 @@
+/* ============================================================
+   The guided tour — splash, dim, ring and card.
+
+   Not scoped to `.lp` or `.app-shell`: the layer is portalled to <body>
+   and plays over both. So it restates the handful of tokens it reads.
+   The language is the same — white card, ink at four opacities, dark
+   acts, lime marks what is live (here: the ring and the current step).
+   ============================================================ */
+
+.tour-layer,
+.tour-splash {
+  --ink: #242426;
+  --ink-75: rgba(36, 36, 38, 0.75);
+  --ink-50: rgba(36, 36, 38, 0.5);
+  --ink-25: rgba(36, 36, 38, 0.25);
+  --ink-12: rgba(36, 36, 38, 0.12);
+  --ink-07: rgba(36, 36, 38, 0.07);
+  --pg: #ebeff5;
+  --pg-deep: #e3e8f1;
+  --dark: #35363b;
+  --lime: #d9ff5c;
+  --lime-deep: #c7f03f;
+  --clay: #e0c5b6;
+  --mist: #c9d3e0;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  font-family: 'Inter Tight', 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------- spotlight -- */
+
+.tour-dim { position: absolute; inset: 0; display: block; }
+
+.tour-ring {
+  position: absolute;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px var(--lime), 0 0 0 7px rgba(217, 255, 92, 0.22);
+}
+
+/* One ripple per step, not a loop: it says "here" once and stops. */
+.tour-ring__pulse {
+  position: absolute;
+  inset: 0;
+  box-shadow: 0 0 0 2px var(--lime);
+  animation: tour-ripple 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.25s 2 both;
+}
+
+@keyframes tour-ripple {
+  from { opacity: 0.9; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.06); }
+}
+
+/* ------------------------------------------------------------ card -- */
+
+.tour-card {
+  position: absolute;
+  width: min(360px, calc(100vw - 28px));
+  padding: 16px 16px 14px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(36, 36, 38, 0.06), 0 30px 70px rgba(20, 20, 24, 0.28);
+}
+
+.tour-card.is-docked {
+  left: 12px !important;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  top: auto !important;
+  width: auto;
+}
+
+.tour-card__top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+
+.tour-card__icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--lime);
+  color: #242426;
+  flex: 0 0 auto;
+}
+
+.tour-card__count { font-size: 12.5px; color: var(--ink-75); }
+
+.tour-card__close {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: auto;
+  border-radius: 999px;
+  color: var(--ink-50);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.tour-card__close:hover { background: var(--pg); color: var(--ink); }
+
+.tour-card__title {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.tour-card__body {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-75);
+}
+.tour-card__body b { font-weight: 500; color: var(--ink); }
+.tour-card__body kbd {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--pg);
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.tour-card__dots { display: flex; gap: 4px; margin: 14px 0 12px; }
+.tour-card__dots i {
+  height: 4px;
+  flex: 1;
+  border-radius: 999px;
+  background: var(--ink-12);
+  transition: background 0.3s ease;
+}
+.tour-card__dots i.done { background: var(--lime-deep); }
+.tour-card__dots i.on { background: var(--dark); }
+
+.tour-card__acts { display: flex; align-items: center; gap: 6px; }
+.tour-card__gap { flex: 1; }
+.tour-card__skip { font-size: 13px; color: var(--ink-75); padding: 6px 4px; }
+.tour-card__skip:hover { color: var(--ink); }
+
+/* The console's button, with its lime sweep. */
+.tour-btn {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 15px;
+  border-radius: 12px;
+  background: var(--dark);
+  color: #fff;
+  font-size: 14px;
+  transition: color 0.22s ease, transform 0.12s ease;
+}
+.tour-btn::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 3px;
+  border-radius: 9px;
+  background: var(--lime);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tour-btn:hover::before,
+.tour-btn:focus-visible::before { transform: scaleX(1); }
+.tour-btn:hover,
+.tour-btn:focus-visible { color: #242426; }
+.tour-btn:active { transform: scale(0.98); }
+.tour-btn--quiet { width: 38px; padding: 0; justify-content: center; background: var(--pg); color: var(--ink-75); }
+.tour-btn--quiet::before { background: var(--pg-deep); }
+
+/* ========================================================== splash -- */
+
+.tour-splash {
+  /* Centred while it fits; taller than the window, it starts at the top
+     instead of pushing the welcome badge off-screen (grid centring did). */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 16px 32px;
+  overflow-y: auto;
+  background: var(--pg);
+}
+.tour-splash > * { margin-block: auto; }
+
+/* The landing's three washes, laid under the splash so it reads as the
+   page's own ground rather than a modal over it. */
+.tour-splash::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(60% 50% at 12% 92%, rgba(217, 255, 92, 0.32) 0%, rgba(217, 255, 92, 0) 70%),
+    radial-gradient(55% 45% at 88% 8%, rgba(201, 211, 224, 0.9) 0%, rgba(201, 211, 224, 0) 70%),
+    radial-gradient(70% 60% at 50% 40%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+}
+
+.tour-splash--console {
+  background: rgba(235, 239, 245, 0.78);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+.tour-splash--console::before { opacity: 0.6; }
+
+.tsp { position: relative; width: 100%; max-width: 980px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+.tsp__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px 0 12px;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 14px;
+  color: var(--ink);
+}
+.tsp__eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--lime-deep); box-shadow: 0 0 0 3px rgba(199, 240, 63, 0.3); }
+
+.tsp__word {
+  display: flex;
+  justify-content: center;
+  margin-top: 22px;
+  font-family: 'Syne', 'Inter Tight', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(64px, 13vw, 168px);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  user-select: none;
+}
+.tsp__word span { display: inline-block; }
+
+.tsp__lead {
+  max-width: 34ch;
+  margin-top: 18px;
+  font-size: clamp(18px, 2vw, 22px);
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+  color: var(--ink-75);
+}
+
+.tsp__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  margin-top: 40px;
+}
+
+.tsp__card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 20px;
+  background: #fff;
+  text-align: left;
+  box-shadow: 0 2px 4px rgba(36, 36, 38, 0.04), 0 18px 40px rgba(36, 36, 38, 0.08);
+}
+.tsp__card-top { display: flex; align-items: center; gap: 10px; width: 100%; }
+.tsp__card-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--pg);
+  color: var(--ink-75);
+}
+.tsp__card-icon.is-lime { background: var(--lime); color: #242426; }
+.tsp__card-icon svg { width: 17px; height: 17px; }
+.tsp__card-step { margin-left: auto; font-size: 12px; color: var(--ink-50); }
+.tsp__card b { font-size: 19px; font-weight: 500; letter-spacing: -0.025em; }
+.tsp__card p { font-size: 14px; line-height: 1.5; color: var(--ink-75); }
+.tsp__card-art { width: 100%; height: 56px; margin-top: 4px; border-radius: 12px; background: var(--pg); padding: 10px 12px; display: flex; align-items: flex-end; gap: 5px; overflow: hidden; }
+.tsp__bar { flex: 1; border-radius: 3px 3px 1px 1px; background: var(--ink-25); }
+.tsp__bar.is-hi { background: var(--dark); }
+.tsp__meter { width: 100%; align-self: center; display: flex; flex-direction: column; gap: 7px; }
+.tsp__meter span { display: block; height: 6px; border-radius: 999px; background: #fff; overflow: hidden; }
+.tsp__meter span i { display: block; height: 100%; border-radius: inherit; }
+.tsp__lines { width: 100%; align-self: center; display: flex; flex-direction: column; gap: 6px; }
+.tsp__lines i { display: block; height: 6px; border-radius: 999px; background: var(--ink-12); }
+.tsp__lines i:first-child { background: var(--lime-deep); }
+
+.tsp__acts { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 36px; }
+.tsp__skip { font-size: 14.5px; color: var(--ink-75); padding: 10px 8px; }
+.tsp__skip:hover { color: var(--ink); }
+.tsp__hint { margin-top: 16px; font-size: 12.5px; color: var(--ink-50); }
+
+/* ---- the console welcome: the auth card's slab, dark panel left ---- */
+
+.tsc {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0.9fr 1fr;
+  width: 100%;
+  max-width: 920px;
+  padding: 8px;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(36, 36, 38, 0.05), 0 30px 80px rgba(36, 36, 38, 0.16);
+  text-align: left;
+}
+.tsc__art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 380px;
+  border-radius: 8px;
+  background: var(--dark);
+  color: #fff;
+  overflow: hidden;
+}
+.tsc__art::after {
+  content: '';
+  position: absolute;
+  inset: auto -20% -40% -20%;
+  height: 70%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(217, 255, 92, 0.18), rgba(217, 255, 92, 0));
+  pointer-events: none;
+}
+.tsc__ringwrap { position: relative; display: grid; place-items: center; }
+.tsc__ringval { position: absolute; display: flex; flex-direction: column; align-items: center; }
+.tsc__ringval b { font-size: 44px; font-weight: 500; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.tsc__ringval span { margin-top: 6px; font-size: 12.5px; color: rgba(255, 255, 255, 0.55); }
+.tsc__legend { position: absolute; left: 20px; right: 20px; bottom: 18px; display: flex; justify-content: center; gap: 16px; font-size: 12.5px; color: rgba(255, 255, 255, 0.7); }
+.tsc__legend span { display: inline-flex; align-items: center; gap: 6px; }
+.tsc__legend i { width: 8px; height: 8px; border-radius: 3px; }
+
+.tsc__body { display: flex; flex-direction: column; padding: 36px 34px 30px; min-width: 0; }
+.tsc__hello { font-size: 13.5px; color: var(--ink-75); }
+.tsc__title { margin-top: 8px; font-size: clamp(26px, 3vw, 34px); font-weight: 400; letter-spacing: -0.04em; line-height: 1.12; }
+.tsc__sub { margin-top: 10px; font-size: 15px; line-height: 1.55; color: var(--ink-75); }
+.tsc__list { display: flex; flex-direction: column; gap: 9px; margin-top: 20px; }
+.tsc__list li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink-75); }
+.tsc__list li i {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: var(--lime);
+  color: #242426;
+  flex: 0 0 auto;
+}
+.tsc__list li i svg { width: 12px; height: 12px; }
+.tsc__acts { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: auto; padding-top: 26px; }
+
+@media (max-width: 860px) {
+  .tsp__cards { grid-template-columns: 1fr; max-width: 420px; margin-top: 28px; }
+  .tsp__card-art { display: none; }
+  .tsc { grid-template-columns: 1fr; max-width: 520px; }
+  .tsc__art { min-height: 220px; }
+  .tsc__body { padding: 26px 22px 22px; }
+}
+
+@media (max-width: 480px) {
+  .tsp__cards { gap: 8px; }
+  .tsp__card { padding: 14px 16px; gap: 6px; }
+  .tsp__card p { display: none; }
+}
