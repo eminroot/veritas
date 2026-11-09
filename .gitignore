@@ -36,6 +36,7 @@ contracts/deployments/31337.json
 .DS_Store
 Thumbs.db
 
-# Local data
+# Local data (the web app's sample data is source code, not local data)
 data/
+!/frontend/src/data/
 *.log
