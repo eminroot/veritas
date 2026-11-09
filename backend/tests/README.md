@@ -79,7 +79,13 @@ Shared helpers:
 | `test_health.py` | Liveness, readiness (database and PostGIS), the error format and OpenAPI | Operators and the app rely on one predictable error shape |
 | `test_settings.py` | Settings from the environment, and what production refuses | Development shortcuts must never reach production |
 | `test_limits.py` | Body size limits: small for JSON, large only for file uploads, always the JSON error | No one can make the API parse half a gigabyte before logging in |
+| `test_assistant.py` | The assistant: what it sends the model (rules, facts, `store: false`), signed earlier replies and forged ones left out, plain prompt injections refused without a model call, an answer that leaks its rules withheld, hidden characters removed, the per-visitor and daily limits, the model failing | A chat on a public page is a way in for abuse and for prompt injection |
+| `test_assistant_route.py` | The real app serves the assistant, and says when it is off | Wired in, not only written |
 | `test_auth.py` | Phone login with one-time codes: hashing, attempts, expiry, rate limits, logout | Accounts are only as safe as the login |
+| `test_demo_account.py` | The demo account: the seed script makes it with the published email and password, and puts it back after someone changes or locks it | The judges' way in must always work |
+| `test_demo_login.py` | The demo buttons' sign-in: refused unless switched on; the donor and the organisation each get a session; the organisation is verified, with a verified contractor and an officer, and can publish the example Passport; signing in again reuses the same accounts; any other kind is refused | One click must open a demo that works, and nothing else |
+| `test_password_auth.py` | Email and password accounts: scrypt hashes, one account per email, the lock after wrong passwords, emailed links to set a new one, changing it | For most people on the web, the password is the way in |
+| `test_web_sign_in.py` | Google sign-in with a Firebase ID token: Google's signature, the project, expiry, a verified email, joining the account that has the email, key caching, CORS | A forged or stale token must never become a session |
 | `test_devices.py` | Registering a phone's key, revoking it, logging out everywhere | A lost phone must lose every session it had |
 | `test_storage.py` | Private file storage: keys cannot escape its root | Evidence originals stay private |
 | `test_cid.py` | Our CID calculation matches IPFS | Anchored CIDs must point at the published files |

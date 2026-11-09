@@ -71,7 +71,17 @@ The OpenAPI docs are at http://localhost:8000/docs. Without `VERITAS_CHAIN_RPC_U
 
 ```sql
 UPDATE users SET is_admin = true WHERE phone = '+994501234567';
+-- or, for an account made in the web app:
+UPDATE users SET is_admin = true WHERE email = 'you@example.com';
 ```
+
+For a demo, `uv run python scripts/seed_demo.py` makes the account the judges sign in with (`admin@gmail.com`, password `admin1234`), or puts it back if someone changed it; `--email` and `--password` choose others. It is an ordinary donor account. With `VERITAS_DEMO_LOGIN=true`, `POST /v1/auth/demo` signs anyone in without a password, as that donor (`{"kind": "donor"}`) or as a demo organisation (`{"kind": "organisation"}`: First Steps Children's Fund, verified, with a verified contractor and an active Verification Officer, so it can publish a project at once). These are the web app's Demo buttons; turn it on only for a demo server.
+
+The web app's accounts sign up and log in with an email and a password (`POST /v1/auth/signup`, `POST /v1/auth/login`), checked here: salted scrypt hashes, and a lock after too many wrong passwords in a row. A forgotten password is replaced through a one-time link sent by email (`POST /v1/auth/password-reset`, then `.../confirm`). With `VERITAS_MAIL_ECHO=true` (never in production) the email shows up in the console instead of being sent; otherwise it goes out through `VERITAS_SMTP_HOST` and the other `VERITAS_SMTP_*` settings, and `VERITAS_WEB_APP_URL` says where its link points. "Continue with Google" trades a Firebase ID token for a session at `POST /v1/auth/firebase`: set `VERITAS_FIREBASE_PROJECT_ID` to the web app's Firebase project; without it, Google sign-in answers 503. The API checks each token against the keys Google publishes, so it needs to reach www.googleapis.com. When the web app is served from another origin than the API, list that origin in `VERITAS_CORS_ORIGINS`; the Vite dev server and the web app's nginx pass `/v1` through, so neither needs it.
+
+### The assistant
+
+The website's assistant (`veritas/assistant`, `POST /v1/assistant/messages`) answers visitors' questions with an OpenAI model. It is off until there is a key: put `VERITAS_OPENAI_API_KEY=` (or `OPENAI_API_KEY=`) with the key in `backend/.env`, never in the web app. `VERITAS_OPENAI_MODEL` picks the model (gpt-4.1-mini by default). The model gets a fixed description of Veritas (`assistant/knowledge.py`, kept in step with the README) and nothing else: no tools, no accounts, no live data. Each visitor, by IP address, may ask 6 questions a minute and 60 a day, and all visitors together 2,000 a day per API process (`VERITAS_ASSISTANT_*`); behind nginx run uvicorn with `--proxy-headers` so the address is the visitor's, and put the same limit in nginx when several API processes run. Questions are logged by count only, never by content.
 
 ### Running the chain side
 
@@ -110,7 +120,8 @@ src/veritas/chain/        Merkle trees, leaves and EIP-712 messages shared with 
 src/veritas/domain/       rules that don't depend on storage, such as allocation
 src/veritas/passport/     the Project Passport schema, and its problems in readable words
 src/veritas/db/           SQLAlchemy base, models and sessions (sync, psycopg 3)
-src/veritas/services/     what the API does: login, key proofs, onboarding, publishing
+src/veritas/services/     what the API does: phone login, passwords, Google sign-in, email,
+                          key proofs, onboarding, publishing
 src/veritas/api/          FastAPI app factory, routers, dependencies and the error format
 src/veritas/settings.py   configuration from VERITAS_* variables
 src/veritas/storage.py    private file storage (a local directory now, S3 later)

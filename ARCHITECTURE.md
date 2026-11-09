@@ -16,7 +16,7 @@ This is how Veritas is put together: the parts of the system, the technology, ex
 ```mermaid
 flowchart LR
   subgraph clients [Clients]
-    APP[Expo app<br/>donors, charities, officers]
+    APP[Web app<br/>donors, charities, officers]
     VER[Public verifier]
   end
   subgraph servers [Veritas servers]
@@ -55,7 +55,7 @@ flowchart LR
 
 Thick arrows call or write. Dotted arrows only read.
 
-**Client app.** One Expo codebase for iOS, Android and web. Donors give, track, vote and choose refunds or redirects. Charity field staff capture evidence. Verification Officers, the independent reviewers named in each Passport (an audit firm or a partner organisation, for example), review and sign. The app only talks to our API and never calls the chain, but it holds the user's own signing key (section 5).
+**Web app.** A website rather than a phone app, so nobody has to install anything to give or to raise money. Donors give, track, vote and choose refunds or redirects. Charities apply and run their projects, and their field staff capture evidence. Verification Officers, the independent reviewers named in each Passport (an audit firm or a partner organisation, for example), review and sign. The app only talks to our API and never calls the chain, but it holds the user's own signing key (section 5). People sign up with an email and a password, which the API checks itself: salted scrypt hashes, a lock after too many wrong passwords in a row, and one-time links by email to set a new one. Or they continue with Google: Firebase signs them in to Google and the app trades the Firebase ID token for one of our session tokens at `POST /v1/auth/firebase`, where the API checks Google's signature, our project and the expiry. Firebase is not used for anything else, so the whole system runs on our own servers. The one other outside service the website uses is the assistant: questions about how Veritas works go through our API to an OpenAI model, which sees only a fixed description of Veritas, has no tools and no data, and is rate-limited per visitor and per day. The signing key and evidence capture were designed for a phone; how they work in a browser is an open question (section 13).
 
 **API.** A FastAPI service for accounts, Passports, donations, evidence intake, votes, timelines and the impact map.
 
@@ -81,7 +81,8 @@ Thick arrows call or write. Dotted arrows only read.
 
 | Area | Choice | Why |
 | - | - | - |
-| App | Expo (React Native, TypeScript) | Camera, GPS, secure key storage and app attestation need a real native app. The same code builds the web version. |
+| Assistant | An OpenAI model (gpt-4.1-mini by default) called by our API | Visitors' questions answered at once. The key stays on the server; the model gets no tools and no data, so nothing private can leak. |
+| Web app | React 18, TypeScript, Vite, Tailwind CSS; Firebase only for Google sign-in | Nothing to install, one codebase for phones and computers. Passwords are checked by our own API, which trusts only its own session tokens. |
 | API | Python 3.12, FastAPI, Pydantic v2 | One language for the API, the evidence checks and the models. Pydantic models double as the JSON schema the AI has to follow. |
 | Database | PostgreSQL 17 with PostGIS, SQLAlchemy 2, Alembic | One database for data, geofences, jobs and the chain outbox. |
 | Jobs | A small scheduler in `veritas.workers`, then Procrastinate | Periodic jobs in one process, one copy at a time through PostgreSQL advisory locks. Procrastinate (a queue on PostgreSQL, no Redis) comes in when jobs need queues and retries of their own. |
@@ -382,7 +383,7 @@ Money is stored as integer qəpik everywhere, never as floats.
 
 ## 12. Environments
 
-- **Local:** Docker Compose with PostgreSQL and PostGIS, Kubo, Ollama, Anvil, MockBank and a mock card provider. The app runs as an Expo development build.
+- **Local:** Docker Compose with PostgreSQL and PostGIS, Kubo, Ollama, Anvil, MockBank and a mock card provider. The web app runs on the Vite dev server, which passes `/v1` through to the API.
 - **Demo:** contracts on Polygon Amoy, explorer links to amoy.polygonscan.com, MockBank and the card provider's sandbox.
 - **Production:** Polygon PoS, keys in KMS and Safe, two IPFS pinning providers, the real partner bank and card provider.
 
@@ -396,4 +397,5 @@ Money is stored as integer qəpik everywhere, never as floats.
 - Should a Pay-on-Proof charge fund the milestone that was just approved, or the next one?
 - Where does the virtual assets law stand now? It decides when stablecoin mode becomes possible.
 - A live escrow keeps the charity key it was launched with, and live escrows cannot be upgraded. If that key is lost, the charity cannot sign evidence for those projects, and they stop at the evidence deadline. Should a new escrow version let the admin, or the officer, replace a charity's key after a delay, as receipts do?
+- We chose a web app so nobody has to install anything, but the donor's signing key and evidence capture were designed for a phone: the key in the phone's secure storage behind Face ID, and App Attest or Play Integrity proving the genuine app took the photos. In a browser a passkey or a non-extractable WebCrypto key can hold the signing key, but nothing attests which code took a photo. Do field workers get a small capture app of their own, or do officers lean harder on the challenge code, GPS and their own review?
 - Which face and number-plate detector runs in production (OpenCV 5 dropped the Haar cascades), and is the charity admin the right person to confirm photos, or should Veritas staff or the officer do it?

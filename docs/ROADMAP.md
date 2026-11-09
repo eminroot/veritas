@@ -4,7 +4,9 @@ How we get from the design in [ARCHITECTURE.md](../ARCHITECTURE.md) to a working
 
 ## Where things stand
 
-Phase 1 is done: its CI run on GitHub is green. Phases 2 to 6 and 8 are built and pass locally: 74 Foundry tests, and 563 backend tests against PostgreSQL 17 with PostGIS and a local Anvil chain. Those include end-to-end flows that take a card payment, through evidence captured on a phone and checked, all the way to the contractor's payout, and a stopped project back to every donor as refunds and redirects. Each of these phases is done once CI runs its tests green on GitHub; the workflows for the contracts and for the backend with PostGIS and Anvil are in `.github/workflows`.
+Phase 1 is done: its CI run on GitHub is green. Phases 2 to 6 and 8 are built and pass locally: 74 Foundry tests, and 623 backend tests against PostgreSQL 17 with PostGIS and a local Anvil chain. Those include end-to-end flows that take a card payment, through evidence captured on a phone and checked, all the way to the contractor's payout, and a stopped project back to every donor as refunds and redirects. Each of these phases is done once CI runs its tests green on GitHub; the workflows for the contracts and for the backend with PostGIS and Anvil are in `.github/workflows`.
+
+Phase 9 has started as a web app instead of a phone app, so nobody has to install anything: accounts with an email and a password or Google, the donor and organisation pages and the map are built, on sample data where the API has no endpoint yet.
 
 Phase 7, AI and documents, is next. Until it lands, the evidence report marks the challenge-code, deliverable, invoice, e-kassa, VÖEN and AI-image checks as not run, and the officer reviews those items by hand. Photos stay out of the public copy of evidence until the server has a face and number plate detector: OpenCV 5, which the backend installs, no longer ships the Haar cascades the default detector uses. Even with one, a photo goes public only once the charity admin who signs the bundle confirms it shows no face or plate. App Attest and Play Integrity are not built yet either, so in production every bundle fails the attestation check for now. A live escrow keeps the charity key it was launched with; replacing a lost one is an open question in ARCHITECTURE.md. Nothing is deployed to Amoy yet.
 
@@ -110,19 +112,36 @@ Done when the reports for the sample bundles match the hand-labelled expectation
 
 Done when the demo runs from a donation to a contractor payout, and a stopped project returns or moves every donor's money.
 
-## Phase 9: App
+## Phase 9: Web app
 
-- [ ] Expo app shell, navigation, Azerbaijani and English, keys in SecureStore
-- [ ] Donor: browse, donate, receipt timeline, vote, pledges, refund or redirect
-- [ ] Charity: Passport builder, capture flow with the challenge code and GPS
+A website instead of a phone app, so nobody has to install anything.
+
+- [x] Web app shell (React, Vite, Tailwind): landing page, causes, projects and organisations
+- [x] Accounts with an email and a password checked by the API, a new password by emailed link, and Google sign-in through Firebase
+- [x] Organisation application: details and documents through the charity onboarding API
+- [x] Interactive map of Azerbaijan's economic regions, on sample data, with projects abroad listed beside it
+- [x] A demo account, and a sample portfolio every account sees until it has donations of its own
+- [x] Demo donor and Demo organisation buttons on sign-in and sign-up, one click, no email or password
+- [x] Charity: where the organisation is in verification, then a six-step Passport planner (stages, budget lines, proof per stage, contractor and officer, site) that saves as you type, lists what the API says is missing, and publishes
+- [x] Works on phones, tablets and laptops
+- [x] An assistant that answers visitors' questions about Veritas: an OpenAI model through the API, rate-limited and guarded against prompt injection, on its own page and behind a chat button on every page
+- [x] A portfolio that opens each project: the donor's money in it milestone by milestone, the proof behind each milestone (its files' fingerprints, the on-chain record, the 11 checks and the officer's decision) and the donors' vote, with the donor's own; organisations see the same for their projects
+- [x] Export a portfolio, or one project, as a designed PDF report or an Excel workbook, made in the browser
+- [x] A How it works page: the eight steps between a gift and a paid builder, each drawn and animated
+- [x] A finished sample project whose proof is all open: its site photos, every document and every vote
+- [ ] Donor: give by card, receipt timeline, vote, pledges, refund or redirect, against the API
+- [ ] The portfolio from the API: each donor's released and refunded share, a project's timeline and funded amounts, the officer's reason and the donor's own vote (the web app shows sample proof and votes until then)
+- [ ] Charity: evidence capture with the challenge code and GPS (see the open question on capture in a browser in ARCHITECTURE.md)
+- [ ] Veritas admin: a screen to review, verify, reject or suspend organisations (the API has it already)
 - [ ] Officer: review queue and decision signing
+- [ ] Azerbaijani alongside English, the donor's key in the browser
 
-Done when the whole demo can be done from the app.
+Done when the whole demo can be done from the web app.
 
 ## Phase 10: Public pieces
 
 - [ ] Static verifier page that reads the chain and IPFS directly
-- [ ] Impact map
+- [ ] Impact map fed by the API (the web app draws it from sample data for now)
 - [ ] PDF receipts for tax and CSR reporting
 
 Done when a receipt verifies from a downloaded copy of the verifier page with our API switched off.
@@ -132,6 +151,7 @@ Done when a receipt verifies from a downloaded copy of the verifier page with ou
 - [ ] Docker Compose for the whole stack
 - [ ] Amoy deployment, demo seed data and a scripted walkthrough
 - [ ] Basic monitoring and alerts
+- [ ] A nightly job that fills the analytics star schema (`docs/analytics`) from the app database
 
 Done when one command brings the demo up and the walkthrough passes.
 
