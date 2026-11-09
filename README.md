@@ -5,6 +5,7 @@ AI advises, humans decide, the blockchain enforces.</p>
 
 <p align="center">
   <a href="https://veritas.173.212.195.158.sslip.io"><img alt="Live prototype" src="https://img.shields.io/badge/prototype-live-2EA44F?style=for-the-badge"></a>
+  <a href="https://drive.google.com/file/d/1ZFfALrV7v85nSqNO9sHl1N5nloUg5FhI/view?usp=sharing"><img alt="1-minute video" src="https://img.shields.io/badge/video-1%20minute-E8710A?style=for-the-badge"></a>
 </p>
 <p align="center">
   <a href="https://github.com/eminroot/veritas/actions/workflows/backend.yml"><img alt="Backend CI" src="https://github.com/eminroot/veritas/actions/workflows/backend.yml/badge.svg"></a>
@@ -25,6 +26,8 @@ AI advises, humans decide, the blockchain enforces.</p>
 > [!TIP]
 > **Our prototype is live: [veritas.173.212.195.158.sslip.io](https://veritas.173.212.195.158.sslip.io)**
 >
+> **Prefer to watch first?** Here is a [1-minute video of our prototype](https://drive.google.com/file/d/1ZFfALrV7v85nSqNO9sHl1N5nloUg5FhI/view?usp=sharing).
+>
 > Dear jury, you can test it right now, nothing to install. Open the [sign-in page](https://veritas.173.212.195.158.sslip.io/login) and either:
 >
 > - sign in with **`admin@gmail.com`** / **`admin1234`**, or
@@ -36,7 +39,7 @@ Veritas is a donation platform for Azerbaijan. A registered organisation publish
 
 | | |
 |---|---|
-| **For judges** | Open the [live prototype](https://veritas.173.212.195.158.sslip.io) and sign in with `admin@gmail.com` / `admin1234` ([section 3](#3-try-it)). |
+| **For judges** | Open the [live prototype](https://veritas.173.212.195.158.sslip.io) and sign in with `admin@gmail.com` / `admin1234` ([section 3](#3-try-it)), or watch the [1-minute video](https://drive.google.com/file/d/1ZFfALrV7v85nSqNO9sHl1N5nloUg5FhI/view?usp=sharing). |
 | **Quick read** | [Purpose](#1-purpose), [the story](#2-a-short-story-fictional), [the journeys in screenshots](#5-the-journeys-screen-by-screen). |
 | **Diagrams** | [Use cases](#6-use-case-diagram), [architecture](#7-architecture), [data flow](#8-data-flow-diagrams), [entity relationships](#103-the-main-entities), [star schema](#11-analytics-model-the-star-schema). |
 | **Dictionaries** | [Process dictionary](#9-process-dictionary), [table and column dictionary](#105-table-dictionary), [star schema dictionary](#116-table-dictionary), [metafile](docs/analytics/metadata.yml). |
