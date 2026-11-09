@@ -27,6 +27,7 @@ contracts/deployments/31337.json
 .env
 .env.*
 !.env.example
+deploy/*.env
 *.pem
 *.key
 

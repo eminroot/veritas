@@ -1,0 +1,53 @@
+# Veritas on one server: PostgreSQL with PostGIS, the API, and the web app (nginx serving the
+# build and passing /v1 to the API). Only the web app is published, on 127.0.0.1:${WEB_PORT}
+# for the host's reverse proxy. Settings for the API come from deploy/veritas.env.
+#
+#   docker compose up -d --build
+name: veritas
+
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: veritas
+      POSTGRES_USER: veritas
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U veritas -d veritas"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    env_file: deploy/veritas.env
+    environment:
+      VERITAS_DATABASE_URL: postgresql+psycopg://veritas:${POSTGRES_PASSWORD}@db:5432/veritas
+      VERITAS_STORAGE_DIR: /app/data/storage
+    volumes:
+      - api-storage:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8110}:80"
+    depends_on:
+      - api
+
+volumes:
+  db-data:
+  api-storage:
