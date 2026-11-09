@@ -4,6 +4,9 @@
 AI advises, humans decide, the blockchain enforces.</p>
 
 <p align="center">
+  <a href="https://veritas.173.212.195.158.sslip.io"><img alt="Live prototype" src="https://img.shields.io/badge/prototype-live-2EA44F?style=for-the-badge"></a>
+</p>
+<p align="center">
   <a href="https://github.com/eminroot/veritas/actions/workflows/backend.yml"><img alt="Backend CI" src="https://github.com/eminroot/veritas/actions/workflows/backend.yml/badge.svg"></a>
   <a href="https://github.com/eminroot/veritas/actions/workflows/contracts.yml"><img alt="Contracts CI" src="https://github.com/eminroot/veritas/actions/workflows/contracts.yml/badge.svg"></a>
 </p>
@@ -19,11 +22,21 @@ AI advises, humans decide, the blockchain enforces.</p>
   <img alt="Status" src="https://img.shields.io/badge/status-prototype-E8710A?style=flat-square">
 </p>
 
+> [!TIP]
+> **Our prototype is live: [veritas.173.212.195.158.sslip.io](https://veritas.173.212.195.158.sslip.io)**
+>
+> Dear jury, you can test it right now, nothing to install. Open the [sign-in page](https://veritas.173.212.195.158.sslip.io/login) and either:
+>
+> - sign in with **`admin@gmail.com`** / **`admin1234`**, or
+> - press **Demo donor** or **Demo organisation** to try each side of Veritas in one click.
+>
+> Worth a look: give to a project and see where your money waits, open a project's proof, publish a Passport as the organisation, and ask the assistant in the corner anything about how Veritas works. Projects and amounts are sample data, so feel free to click everything.
+
 Veritas is a donation platform for Azerbaijan. A registered organisation publishes a **Project Passport** before it raises a single manat: the goal, a line-item budget for each milestone, the contractor who will do the work, the proof each milestone needs and who decides. Donations wait in **escrow**, milestone by milestone. The money for a milestone moves only after photos from the site pass automated checks, an independent **Verification Officer** signs an approval and the donors who paid for that milestone vote. It then goes straight to the contractor's verified bank account against an invoice. Every step is written to a public blockchain, so nobody can quietly change the record or move the money, Veritas included.
 
 | | |
 |---|---|
-| **For judges** | Sign in with `admin@gmail.com` / `admin1234` ([section 3](#3-try-it)). |
+| **For judges** | Open the [live prototype](https://veritas.173.212.195.158.sslip.io) and sign in with `admin@gmail.com` / `admin1234` ([section 3](#3-try-it)). |
 | **Quick read** | [Purpose](#1-purpose), [the story](#2-a-short-story-fictional), [the journeys in screenshots](#5-the-journeys-screen-by-screen). |
 | **Diagrams** | [Use cases](#6-use-case-diagram), [architecture](#7-architecture), [data flow](#8-data-flow-diagrams), [entity relationships](#103-the-main-entities), [star schema](#11-analytics-model-the-star-schema). |
 | **Dictionaries** | [Process dictionary](#9-process-dictionary), [table and column dictionary](#105-table-dictionary), [star schema dictionary](#116-table-dictionary), [metafile](docs/analytics/metadata.yml). |
@@ -102,15 +115,19 @@ If the project had stopped, Aysel would have chosen: her money back to her card,
 
 ## 3. Try it
 
+**Live:** [https://veritas.173.212.195.158.sslip.io](https://veritas.173.212.195.158.sslip.io)
+
 The web app has a demo account for the judges and anyone else trying Veritas:
 
 | Email | Password |
 |---|---|
 | `admin@gmail.com` | `admin1234` |
 
+No password at all? The [sign-in page](https://veritas.173.212.195.158.sslip.io/login) also has **Demo donor** and **Demo organisation** buttons: the first gives and follows the money, the second is a verified organisation that plans and publishes projects.
+
 Every account, this one included, starts with the same **sample portfolio** until it makes donations of its own: 11 gifts across 11 projects, with money released to contractors, money waiting in escrow and a refund from a stopped project. Anything built on sample data carries a dashed *Sample data* label. You can also sign up with any email and a password, or with Google.
 
-To make the demo account on a new database: `cd backend && uv run python scripts/seed_demo.py` (running it again resets its password). How to run everything locally is in [section 14](#14-run-it). The public address will be added here once the server is deployed.
+To make the demo account on a new database: `cd backend && uv run python scripts/seed_demo.py` (running it again resets its password; the Docker setup does this on every start). How to run everything locally is in [section 14](#14-run-it), and how the live server is set up is in [DEPLOY.md](DEPLOY.md).
 
 ---
 
@@ -1681,7 +1698,16 @@ On Polygon this is cents per transaction, and only the relayer's account needs f
 
 ## 14. Run it
 
-You need PostgreSQL 17 with PostGIS, Python 3.12 with [uv](https://docs.astral.sh/uv/), [Foundry](https://book.getfoundry.sh/) and Node.js 20+.
+**The quick way: Docker.** With Docker and `make`, one command runs the database, the API and the web app together, the same way as the live site:
+
+```bash
+make env    # first time only: makes .env and deploy/veritas.env with fresh secrets
+make up     # builds and starts everything, on http://127.0.0.1:8110
+```
+
+`make help` lists the rest (logs, health, reseeding the demo account, a database shell). [DEPLOY.md](DEPLOY.md) walks through putting it on a server with a domain and HTTPS.
+
+**Part by part, for development.** You need PostgreSQL 17 with PostGIS, Python 3.12 with [uv](https://docs.astral.sh/uv/), [Foundry](https://book.getfoundry.sh/) and Node.js 20+.
 
 ```bash
 # backend: API, workers, tests
@@ -1736,6 +1762,10 @@ backend/              Python: API, workers, relayer and indexer, the mock card p
 contracts/            Solidity contracts and the deploy script
   test/               Foundry tests, explained in test/README.md
 frontend/             the web app: React, TypeScript, Vite
+deploy/               the server's settings template (veritas.env.example)
+docker-compose.yml    database, API and web app together
+Makefile              make up, make logs, make health, ...
+DEPLOY.md             how the live site is deployed
 docs/
   analytics/          the star schema (SQL), its metafile and the metric queries
   images/journey/     the screenshots in this README
