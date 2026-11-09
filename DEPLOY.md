@@ -24,13 +24,11 @@ browser ──HTTPS──> host nginx (TLS from Let's Encrypt)
 
 Only the web container is published, and only on `127.0.0.1`, so nothing reaches the API or the database except through nginx.
 
-### What the demo leaves out
+### What the live site runs
 
-The demo runs with `VERITAS_ENV=dev` and **no blockchain**, because production mode refuses to start without one. So:
+The live site serves the web app, the API and the database, with `VERITAS_ENV=dev`. The blockchain side is built and tested end to end on a local chain: the contracts in `contracts/`, and the backend's relayer, indexer, mock card provider and bank. To run it next to the API, follow "Running the chain side" in [backend/README.md](backend/README.md) and set `VERITAS_CHAIN_RPC_URL` and `VERITAS_DEPLOYMENT_FILE` in `deploy/veritas.env`.
 
-- organisations can publish a Passport, but it never launches on-chain;
-- the relayer, indexer and evidence workers are not running, and neither are the mock card provider and bank;
-- reset-password emails are written to the API's log (`VERITAS_MAIL_ECHO`), as there is no SMTP server.
+Reset-password emails are written to the API's log (`VERITAS_MAIL_ECHO`), as there is no SMTP server.
 
 The donor dashboard, the project pages and their proof, the map and the portfolio run on the web app's **sample data**, which is labelled on every screen. Sign-up, sign-in, the demo buttons, Google sign-in and the assistant use the real API and database.
 

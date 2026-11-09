@@ -96,7 +96,7 @@ Veritas is a donation platform for Azerbaijan. A registered organisation publish
 | **Veritas admin** | Verifies organisations, contractors and officers before they can take part. |
 | **Partner bank** | Holds the money in a regulated account and pays contractors and refunds against signed instructions. |
 
-**What it is not.** Not personal fundraising: only verified organisations raise money. Not crypto for donors: no wallet, no gas, nothing to install. The AI does not decide anything: it writes a report that a person reads. And it is a prototype: nothing is deployed to a public chain yet, and the projects, organisations and amounts in the web app are **sample data**, marked as such on every screen.
+**What it is not.** Not personal fundraising: only verified organisations raise money. Not crypto for donors: no wallet, no gas, nothing to install. The AI does not decide anything: it writes a report that a person reads. And it is a prototype: the projects, organisations and amounts in the web app are **sample data**, marked as such on every screen.
 
 ---
 
@@ -1689,7 +1689,7 @@ On Polygon this is cents per transaction, and only the relayer's account needs f
 | 7 | A project's region is the economic region that contains its site (Azerbaijan's 14 regions, 2021 division); work abroad is filed under its country. | The map and the region metrics. |
 | 8 | Dates in reports are Baku time (UTC+4); the database stores UTC. | A donation at 23:30 in Bakı counts on that day. |
 | 9 | The card provider and the bank are pretend versions in development and the demo, with the same signatures and messages as real ones would have. | The whole flow can be shown without real money. |
-| 10 | The demo chain is Polygon's Amoy testnet; nothing is deployed there yet. | Real deployment is on the roadmap. |
+| 10 | The chain is Polygon's Amoy testnet, and the tests run the same contracts on a local chain (Anvil). | The whole road is tested end to end through the API, the relayer, the contracts and the indexer: launching a Passport, a card donation, a milestone paid to the contractor, a stopped project refunding its donors. |
 | 11 | The web app's projects, organisations and amounts are invented sample data, labelled on every screen. Every account sees the same sample portfolio until it gives. | The demo shows full dashboards on day one. |
 | 12 | The star schema is designed, documented and tested on PostgreSQL; the nightly job that fills it from the app database comes with deployment. | The metric formulas are fixed now; the numbers in section 4 come from the sample data. |
 | 13 | Each donor signs with a different key for every project, kept on their own device (the phone's secure storage; in the web app, the browser, next). | Their gifts cannot be linked to each other on-chain. |
@@ -1793,7 +1793,7 @@ ARCHITECTURE.md       the full design: what goes on-chain and why
 | 8 | Decisions and payouts: officer, votes, releases, stops, refunds, redirects | Built, tests pass |
 | 9 | The web app for donors, organisations and officers | Started: accounts, donor and organisation pages, the map |
 | 10 | Public pieces: the verifier page, impact map, PDF receipts | Planned |
-| 11 | Demo and deployment: Docker Compose, the server, Amoy, monitoring, the nightly analytics load | Planned |
+| 11 | Demo and deployment: Docker Compose, the server, Amoy, monitoring, the nightly analytics load | Started: Docker Compose and the live server |
 | 12 | Hardening: security review, load tests, documentation | Planned |
 
 Details and open questions are in [docs/ROADMAP.md](docs/ROADMAP.md).
