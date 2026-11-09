@@ -1,0 +1,1112 @@
+/* ============================================================
+   The console skin — MuhAI's design language, signed in.
+
+   Ported from MuhAI's console.css + layout.css. The marketing page and
+   the product are one thing: the #ebeff5 ground under white panels,
+   #242426 ink at four opacities, #35363b for anything that acts and
+   #d9ff5c for whatever is live, Inter Tight throughout, radii that run
+   8 / 12 / 16 / 20 / 24.
+
+   Everything is scoped to `.app-shell`. The rules under the tokens are
+   only the places where a token is not enough: the rail, the top bar,
+   the buttons and the tags each have a *shape* in this language.
+
+   The language, in five rules:
+
+     1. The ground is tinted and the cards are white. That contrast is the
+        structure; a card needs no shadow to be found.
+     2. An edge is one hairline of ink at 7%. No drop shadows except on
+        things that genuinely float — a popover, a sheet, the tour card.
+     3. Dark is what acts: buttons, the avatar, the send button. Lime is
+        what is live: the current rail tile, the selected segment, the mark
+        on a done thing. Neither appears twice in one card.
+     4. Inter Tight everywhere, tracking negative and tightening as the size
+        grows: -0.01em at 14px, -0.03em at 30px.
+     5. Status keeps colour, muted to the page: #4a7c33 ok, #9a6420 warn,
+        #a4433a stop. A status is a tint pill and the word, nothing else.
+   ============================================================ */
+
+/* Tokens the auth field primitives read outside the shell as well. */
+:root {
+  --text-primary: #242426;
+  --text-secondary: rgba(36, 36, 38, 0.75);
+  --text-muted: rgba(36, 36, 38, 0.5);
+  --text-heading: #242426;
+  --text-body: rgba(36, 36, 38, 0.75);
+  --surface-card: #ffffff;
+  --surface-page: #ebeff5;
+  --border-default: rgba(36, 36, 38, 0.12);
+  --border-strong: rgba(36, 36, 38, 0.25);
+  --focus: rgba(36, 36, 38, 0.1);
+  --accent: #35363b;
+  --r-panel: 16px;
+  --tag-red-ink: #a4433a;
+  --tag-red-tint: rgba(190, 70, 60, 0.13);
+  --tag-green-ink: #4a7c33;
+  --tag-green-tint: rgba(88, 150, 60, 0.13);
+}
+
+.app-shell {
+  --pg: #ebeff5;
+  --pg-deep: #e3e8f1;
+  --card: #ffffff;
+
+  --ink: #242426;
+  --ink-75: rgba(36, 36, 38, 0.75);
+  --ink-50: rgba(36, 36, 38, 0.5);
+  --ink-25: rgba(36, 36, 38, 0.25);
+  --ink-12: rgba(36, 36, 38, 0.12);
+  --ink-07: rgba(36, 36, 38, 0.07);
+
+  --dark: #35363b;
+  --dark-2: #4d4f57;
+  --on-dark: #ffffff;
+  --on-dark-75: rgba(255, 255, 255, 0.75);
+  --on-dark-50: rgba(255, 255, 255, 0.5);
+
+  --lime: #d9ff5c;
+  --lime-deep: #c7f03f;
+  --clay: #e0c5b6;
+  --mist: #c9d3e0;
+  --pill: 999px;
+
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 20px;
+  --r-xl: 24px;
+  --r-control: 10px;
+
+  --shadow-pop: 0 2px 4px rgba(36, 36, 38, 0.05), 0 18px 44px rgba(36, 36, 38, 0.12);
+  --shadow-3: 0 2px 4px rgba(36, 36, 38, 0.05), 0 24px 60px rgba(36, 36, 38, 0.12);
+
+  --sans: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --font-logo: 'Syne', 'Inter Tight', system-ui, sans-serif;
+  --ease: cubic-bezier(0.44, 0, 0.56, 1);
+
+  --rail-w: 92px;
+  --gutter: 28px;
+  /* The work gets the width; the gutter keeps it off the edge. */
+  --measure: 1520px;
+  --topbar-h: 60px;
+
+  --ck-grid: rgba(36, 36, 38, 0.07);
+  --ck-cross: rgba(36, 36, 38, 0.3);
+
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-left: var(--rail-w);
+  background: var(--pg);
+  color: var(--ink);
+  font-family: var(--sans);
+  letter-spacing: -0.01em;
+}
+
+.main-col { display: flex; flex-direction: column; min-width: 0; min-height: 100vh; min-height: 100svh; }
+
+.app-shell :is(h1, h2, h3, h4, h5) {
+  font-family: var(--sans);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+/* ============================================================
+   NAVIGATION RAIL
+
+   A narrow column of tiles with the live one filled lime — the landing
+   hero's mock rail, with the labels the console needs under each glyph.
+   Icon-plus-label, not icon-only: a bare icon rail makes people hover to
+   read their own menu.
+   ============================================================ */
+
+.rail {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--rail-w);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 6px 18px;
+  background: var(--card);
+  border-right: 1px solid var(--ink-07);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.rail::-webkit-scrollbar { width: 0; }
+
+.rail__logo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 2px 0 10px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-logo);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+  position: relative;
+  flex: 0 0 auto;
+}
+.rail__logo::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lime);
+}
+
+.rail__group { display: flex; flex-direction: column; width: 100%; gap: 1px; }
+.rail__group--foot { margin-top: auto; }
+
+.rail__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 6px 2px 7px;
+  border-radius: var(--r-sm);
+  color: var(--ink-50);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 180ms var(--ease);
+}
+
+.rail__tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  color: var(--ink-50);
+  transition: background 180ms var(--ease), color 180ms var(--ease);
+}
+
+.rail__label {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink-75);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 100%;
+  transition: color 180ms var(--ease);
+}
+
+.rail__item:hover .rail__tile { background: var(--pg); color: var(--ink); }
+.rail__item:hover .rail__label { color: var(--ink); }
+.rail__item.is-live .rail__tile { background: transparent; color: #242426; }
+.rail__item.is-live .rail__label { color: var(--ink); }
+
+/* The lime is one element that moves from tile to tile (shared layoutId),
+   so a click reads as travelling rather than a swap. */
+.rail__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: var(--lime);
+}
+.rail__tile > svg { position: relative; z-index: 1; }
+.rail__tile > .rail__badge { z-index: 2; }
+
+.rail__badge {
+  position: absolute;
+  top: -5px;
+  right: -3px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: var(--pill);
+  background: var(--dark);
+  color: var(--on-dark);
+  font-size: 10px;
+  font-weight: 500;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--card);
+  box-sizing: content-box;
+}
+
+.rail__rule { width: 44px; height: 1px; background: var(--ink-07); margin: 8px 0; flex: 0 0 auto; }
+
+/* ============================================================
+   THE TOP BAR
+
+   Flush and full width beside the rail, held by one hairline. Indoors a
+   rounded slab hovering over the work reads as a second card competing
+   with the real ones.
+   ============================================================ */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--topbar-h);
+  padding: 0 max(var(--gutter), calc((100% - var(--measure)) / 2 + var(--gutter)));
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(160%) blur(10px);
+  -webkit-backdrop-filter: saturate(160%) blur(10px);
+  box-shadow: inset 0 -1px 0 var(--ink-07);
+}
+
+.app-shell .brand {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  font-family: var(--font-logo);
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink);
+  text-decoration: none;
+  transition: opacity 200ms var(--ease);
+}
+.app-shell .brand:hover { opacity: 0.65; }
+
+.topbar__crumb {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-75);
+  white-space: nowrap;
+}
+.topbar__crumb b { font-weight: 400; color: var(--ink); }
+
+.topbar__search-wrap { position: relative; flex: 1; max-width: 380px; min-width: 0; }
+
+.topbar__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 8px 0 14px;
+  border-radius: var(--pill);
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  color: var(--ink-50);
+  transition: border-color 180ms var(--ease), box-shadow 180ms var(--ease);
+}
+.topbar__search:hover { border-color: var(--ink-25); }
+.topbar__search:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px var(--ink-07); }
+.topbar__search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.topbar__search input::placeholder { color: var(--ink-50); }
+.topbar__kbd {
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border-radius: 7px;
+  background: var(--pg);
+  font-size: 11.5px;
+  color: var(--ink-75);
+}
+
+.topbar-meta { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+/* A chip is a fact worth reading without hunting for it: the landing's
+   own eyebrow pill, at console scale. */
+.app-shell .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--pill);
+  background: var(--pg);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ink-75);
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 180ms var(--ease), color 180ms var(--ease);
+}
+.app-shell .chip:hover { background: var(--pg-deep); color: var(--ink); }
+.app-shell .chip svg { color: var(--ink-50); }
+.app-shell .chip b { font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.app-shell .chip--lime { background: var(--lime); color: #242426; }
+.app-shell .chip--lime svg { color: #242426; }
+.app-shell .chip--lime:hover { background: var(--lime-deep); }
+/* A chip carrying a whole question wraps instead of running off a phone screen. */
+.app-shell .chip--wrap { white-space: normal; height: auto; min-height: 34px; padding: 7px 14px; line-height: 1.35; text-align: left; }
+
+.topbar__icon-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--pill);
+  color: var(--ink-50);
+  transition: background 180ms var(--ease), color 180ms var(--ease);
+}
+.topbar__icon-btn:hover,
+.topbar__icon-btn[aria-expanded='true'] { background: var(--pg); color: var(--ink); }
+
+.topbar__notif-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a4433a;
+  border: 1.5px solid var(--card);
+}
+
+.topbar__avatar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 12px 3px 3px;
+  border-radius: var(--pill);
+  transition: background 180ms var(--ease);
+  text-align: left;
+}
+.topbar__avatar:hover,
+.topbar__avatar[aria-expanded='true'] { background: var(--pg); }
+
+/* The mock's own avatar: a clay-to-mist disc, initials kept for telling
+   two accounts apart. */
+.topbar__avatar-img {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: var(--pill);
+  background: linear-gradient(140deg, var(--clay), var(--mist));
+  color: #242426;
+  display: grid;
+  place-items: center;
+  font-weight: 500;
+  font-size: 12px;
+}
+.topbar__avatar-name { display: block; font-size: 13.5px; color: var(--ink); line-height: 1.25; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topbar__avatar-role { display: block; font-size: 11.5px; color: var(--ink-75); line-height: 1.25; }
+
+.topbar__pop-anchor { position: relative; }
+
+/* ---------------------------------------------------- popovers -- */
+
+.popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 50;
+  min-width: 280px;
+  max-width: min(360px, calc(100vw - 24px));
+  max-height: min(70vh, 460px);
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+}
+.popover--right { left: auto; right: 0; }
+.popover--search { width: 100%; max-width: none; }
+
+.popover__label { padding: 8px 11px 4px; font-size: 12px; color: var(--ink-75); }
+
+.popover__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: var(--r-xs);
+  text-align: left;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 120ms var(--ease);
+}
+.popover__row:hover,
+.popover__row.is-active { background: var(--pg); }
+.popover__row svg { color: var(--ink-50); flex: 0 0 auto; }
+.popover__row .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.popover__title { font-size: 13.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.popover__meta { font-size: 12.5px; color: var(--ink-75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.popover__row--danger { color: #a4433a; }
+.popover__row--danger svg { color: #a4433a; }
+.popover__row--danger:hover { background: rgba(190, 70, 60, 0.1); }
+.popover__rule { height: 1px; margin: 5px 6px; background: var(--ink-07); }
+.popover__empty { padding: 16px 12px; font-size: 13px; color: var(--ink-75); }
+
+.popover__dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+.popover__dot--stop { background: #a4433a; }
+.popover__dot--warn { background: #c08a3e; }
+.popover__dot--ok { background: #4a7c33; }
+
+/* ============================================================
+   PAGE FRAME
+
+   The mock's header: a 30px title, a muted line under it, the actions on
+   the right. One gap — 16px — between anything and the thing under it,
+   and the same 16 inside every grid, so a two-column row and the stack
+   it sits in share a rhythm.
+   ============================================================ */
+
+.page {
+  width: 100%;
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 26px var(--gutter) 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.page > * { margin-top: 0; margin-bottom: 0; }
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--ink-07);
+}
+.page-head__text { min-width: 0; }
+
+.page-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  height: 30px;
+  padding: 0 12px 0 10px;
+  border-radius: var(--pill);
+  background: var(--card);
+  font-size: 13px;
+  color: var(--ink-75);
+}
+.page-eyebrow svg { width: 15px; height: 15px; color: var(--ink-50); }
+
+.page-title {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.page-sub {
+  margin-top: 8px;
+  max-width: 64ch;
+  font-size: 14.5px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--ink-75);
+}
+
+.page-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* ============================================================
+   CARDS
+
+   White panel, one hairline, r16. The tinted ground is what makes it a
+   card; nothing here lifts.
+   ============================================================ */
+
+.panel {
+  min-width: 0;
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  border-radius: var(--r-md);
+  padding: 20px;
+}
+/* Settings jumps to a panel by id; keep it clear of the sticky topbar. */
+.panel[id] { scroll-margin-top: 76px; }
+.panel--flush { padding: 0; overflow: hidden; }
+.panel--tint { background: var(--pg-deep); border-color: transparent; }
+.panel--dark { background: var(--dark); border-color: transparent; color: var(--on-dark); }
+.panel--dark :is(h2, h3, h4) { color: var(--on-dark); }
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--ink-07);
+}
+.panel--flush > .panel-head { margin: 0; padding: 18px 20px 14px; }
+/* On a phone, a panel's actions go under its title rather than past the edge. */
+@media (max-width: 560px) {
+  .panel-head { flex-wrap: wrap; }
+}
+.panel-head__text { min-width: 0; }
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.panel-title svg { width: 16px; height: 16px; color: var(--ink-50); flex: 0 0 auto; }
+.panel-sub { margin-top: 2px; font-size: 13px; color: var(--ink-75); letter-spacing: -0.01em; }
+
+/* ---------------------------------------------------- figures -- */
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  border-radius: var(--r-md);
+  padding: 18px 20px;
+  transition: border-color 200ms var(--ease);
+}
+.stat:hover { border-color: var(--ink-12); }
+.stat__top { display: flex; align-items: center; gap: 10px; }
+.stat__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: var(--r-sm);
+  background: var(--pg);
+  color: var(--ink-50);
+}
+.stat__icon svg { width: 17px; height: 17px; }
+.stat__icon--lime { background: var(--lime); color: #242426; }
+.stat__label { font-size: 13px; color: var(--ink-75); letter-spacing: -0.01em; }
+.stat__value {
+  margin-top: 10px;
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.stat__value small { font-size: 17px; color: var(--ink-75); margin-left: 3px; font-weight: 400; }
+.stat__foot { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12.5px; color: var(--ink-75); flex-wrap: wrap; }
+
+/* A thin progress rule. The fill is the series colour or ink. */
+.meter { height: 6px; width: 100%; border-radius: var(--pill); background: var(--pg); overflow: hidden; }
+.meter > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ink);
+  transition: width 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================================
+   TAGS — `.lp-tag` verbatim: 22px tall, a tint and a word.
+   ============================================================ */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: var(--pill);
+  background: var(--ink-07);
+  color: var(--ink-75);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.tag svg { width: 12px; height: 12px; }
+.tag--ok { background: rgba(88, 150, 60, 0.13); color: #4a7c33; }
+.tag--warn { background: rgba(186, 120, 40, 0.14); color: #9a6420; }
+.tag--stop { background: rgba(190, 70, 60, 0.13); color: #a4433a; }
+.tag--info { background: rgba(63, 95, 134, 0.12); color: #3f5f86; }
+.tag--dark { background: var(--dark); color: #fff; }
+.tag--lime { background: var(--lime); color: #242426; }
+
+/* ============================================================
+   BUTTONS
+
+   The landing control is a pill with a lime chip that sweeps the label
+   into view. A console `<button class="btn">` has one label, so it runs
+   the same idea with a lime panel inset 3px that grows from the left
+   under the text. `isolation` plus the negative z-index keeps it behind
+   the label without wrapping every label in a span (MuhAI N27).
+   ============================================================ */
+
+.btn {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 220ms var(--ease), color 220ms var(--ease),
+              border-color 220ms var(--ease), opacity 140ms var(--ease),
+              transform 120ms var(--ease);
+}
+.btn svg { width: 16px; height: 16px; flex: 0 0 auto; }
+
+.btn::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 3px;
+  border-radius: 9px;
+  background: var(--lime);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn:not(:disabled):hover::before { transform: scaleX(1); }
+.btn:active:not(:disabled) { transform: scale(0.985); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn--primary { background: var(--dark); border-color: var(--dark); color: var(--on-dark); }
+.btn--primary:not(:disabled):hover { color: #242426; }
+
+/* Affirmative actions take the lime outright. */
+.btn--go { background: var(--lime); border-color: var(--lime); color: #242426; }
+.btn--go::before { background: var(--lime-deep); }
+
+.btn--ghost { background: var(--card); border-color: var(--ink-12); color: var(--ink-75); }
+.btn--ghost::before { background: var(--pg); }
+.btn--ghost:not(:disabled):hover { border-color: var(--ink-25); color: var(--ink); }
+
+.btn--quiet { background: none; color: var(--ink-75); padding: 0 12px; }
+.btn--quiet::before { background: var(--pg); }
+.btn--quiet:not(:disabled):hover { color: var(--ink); }
+
+.btn--danger { background: rgba(190, 70, 60, 0.13); color: #a4433a; }
+.btn--danger::before { background: rgba(190, 70, 60, 0.2); }
+
+.btn--sm { height: 32px; padding: 0 12px; font-size: 13px; border-radius: var(--r-control); }
+.btn--sm::before { inset: 2px; border-radius: 8px; }
+.btn--sm svg { width: 14px; height: 14px; }
+.btn--lg { height: 48px; padding: 0 24px; font-size: 15px; border-radius: var(--r-md); }
+.btn--block { width: 100%; }
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-control);
+  color: var(--ink-50);
+  transition: background 140ms var(--ease), color 140ms var(--ease);
+}
+.icon-btn:hover { background: var(--pg); color: var(--ink); }
+.icon-btn[aria-pressed='true'] { background: var(--pg); color: var(--ink); }
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-75);
+  font-size: 13.5px;
+  text-decoration: none;
+  transition: color 140ms var(--ease);
+}
+.link-btn:hover { color: var(--ink); }
+.link-btn svg { width: 14px; height: 14px; color: var(--ink-50); transition: transform 200ms var(--ease); }
+.link-btn:hover svg { color: var(--ink); transform: translateX(2px); }
+
+/* ============================================================
+   SEGMENTED CONTROL — a row of pills; the live one is lime.
+   ============================================================ */
+
+.seg {
+  display: inline-flex;
+  gap: 4px;
+  flex: 0 0 auto;
+  max-width: 100%;
+  padding: 3px;
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  border-radius: var(--pill);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.seg::-webkit-scrollbar { display: none; }
+.seg--tint { background: var(--pg); border-color: transparent; }
+
+.seg > button,
+.seg > a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 15px;
+  border-radius: var(--pill);
+  color: var(--ink-75);
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 180ms var(--ease);
+}
+.seg > :is(button, a):hover { color: var(--ink); }
+.seg > :is(button, a).is-active { color: #242426; }
+.seg > :is(button, a) > * { position: relative; z-index: 1; }
+.seg__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0 !important;
+  border-radius: inherit;
+  background: var(--lime);
+}
+.seg__dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ============================================================
+   INPUTS — white, one hairline, r12, 44 tall. Focus darkens the edge
+   and lays a soft ink ring outside it.
+   ============================================================ */
+
+.app-shell .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.app-shell .field__label { font-size: 13.5px; color: var(--ink-75); letter-spacing: -0.01em; font-weight: 400; }
+.app-shell .field__wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 14px;
+  background: var(--card);
+  border: 1px solid var(--ink-12);
+  border-radius: var(--r-sm);
+  color: var(--ink-50);
+  transition: border-color 180ms var(--ease), box-shadow 180ms var(--ease);
+}
+.app-shell .field__wrap:hover { border-color: var(--ink-25); }
+.app-shell .field__wrap:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px var(--ink-07); }
+.app-shell .field__wrap :is(input, select, textarea) {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+}
+.app-shell .field__wrap textarea { padding: 10px 0; resize: vertical; }
+.app-shell .field__wrap--area { height: auto; align-items: flex-start; }
+.app-shell .field__wrap :is(input, textarea)::placeholder { color: var(--ink-50); }
+.app-shell .field__wrap svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.app-shell .field__hint { font-size: 12.5px; color: var(--ink-75); }
+.app-shell .field__suffix { flex: 0 0 auto; font-size: 13px; color: var(--ink-75); }
+
+/* ============================================================
+   TABLES — the card's own surface for the head, a hairline under it.
+   ============================================================ */
+
+.tbl-scroll { width: 100%; overflow-x: auto; }
+.tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
+.tbl th {
+  padding: 11px 12px;
+  text-align: left;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ink-75);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--ink-07);
+}
+.tbl td {
+  padding: 12px;
+  color: var(--ink-75);
+  border-bottom: 1px solid var(--ink-07);
+  vertical-align: middle;
+}
+.tbl tbody tr:last-child td { border-bottom: 0; }
+.tbl tbody tr { transition: background 120ms var(--ease); }
+.tbl tbody tr:hover td { background: var(--pg); }
+.tbl :is(th, td):first-child { padding-left: 20px; }
+.tbl :is(th, td):last-child { padding-right: 20px; }
+.tbl .strong { color: var(--ink); font-weight: 500; }
+.tbl .right { text-align: right; }
+.tbl .num { font-variant-numeric: tabular-nums; }
+
+/* ============================================================
+   NOTICES · EMPTY · SKELETON
+   ============================================================ */
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  color: var(--ink-75);
+}
+.notice__icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: var(--r-sm);
+  background: var(--pg);
+  color: var(--ink-50);
+}
+.notice__icon svg { width: 17px; height: 17px; }
+.notice__text { flex: 1; min-width: 0; line-height: 1.5; }
+.notice strong { color: var(--ink); font-weight: 500; }
+.notice--warn { background: rgba(186, 120, 40, 0.1); border-color: transparent; color: #8a5a1c; }
+.notice--warn .notice__icon { background: rgba(255, 255, 255, 0.6); color: #9a6420; }
+.notice--stop { background: rgba(190, 70, 60, 0.1); border-color: transparent; color: #a4433a; }
+.notice--stop .notice__icon { background: rgba(255, 255, 255, 0.6); color: #a4433a; }
+.notice--lime { background: var(--lime); border-color: transparent; color: #242426; }
+.notice--lime .notice__icon { background: rgba(255, 255, 255, 0.55); color: #242426; }
+.notice--lime strong { color: #242426; }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 44px 24px;
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  border-radius: var(--r-lg);
+}
+.empty__icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 6px;
+  border-radius: var(--r-md);
+  background: var(--pg);
+  color: var(--ink-50);
+}
+.empty h3 { font-size: 19px; letter-spacing: -0.02em; }
+.empty p { max-width: 46ch; font-size: 14px; color: var(--ink-75); }
+
+.skel {
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, var(--pg) 25%, var(--pg-deep) 50%, var(--pg) 75%);
+  background-size: 400% 100%;
+  animation: skel 1.4s ease infinite;
+}
+@keyframes skel { from { background-position: 100% 0; } to { background-position: 0 0; } }
+
+/* ============================================================
+   LISTS — a row on a tinted plate, the alert vocabulary
+   ============================================================ */
+
+.row-list { display: flex; flex-direction: column; gap: 6px; }
+.row-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  border-radius: var(--r-sm);
+  background: var(--pg);
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  transition: background 150ms var(--ease);
+}
+a.row-item:hover, button.row-item:hover { background: var(--pg-deep); }
+.row-item__mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink-50);
+}
+.row-item__mark svg { width: 15px; height: 15px; }
+.row-item__mark--ok { background: rgba(88, 150, 60, 0.15); color: #4a7c33; }
+.row-item__mark--warn { background: rgba(186, 120, 40, 0.16); color: #9a6420; }
+.row-item__mark--stop { background: rgba(190, 70, 60, 0.14); color: #a4433a; }
+.row-item__mark--lime { background: var(--lime); color: #242426; }
+.row-item__body { flex: 1; min-width: 0; }
+.row-item__title { font-size: 14px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-item__meta { font-size: 12.5px; color: var(--ink-75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ============================================================
+   CHARTS — one anatomy for every plot: a legend, hairline gridlines,
+   a readout card beside the cursor.
+   ============================================================ */
+
+.app-shell .recharts-cartesian-grid line { stroke: var(--ck-grid); }
+.app-shell .recharts-text { fill: var(--ink-75); font-family: var(--sans); font-size: 11.5px; }
+.app-shell .recharts-default-tooltip { display: none; }
+
+.ck-tip {
+  min-width: 150px;
+  padding: 11px 13px;
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-pop);
+}
+.ck-tip__head { font-size: 12.5px; color: var(--ink-75); margin-bottom: 7px; }
+.ck-tip__row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; margin-top: 4px; }
+.ck-tip__row i { width: 9px; height: 9px; border-radius: 3px; flex: 0 0 auto; }
+.ck-tip__label { color: var(--ink-75); }
+.ck-tip__value { margin-left: auto; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.ck-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; }
+.ck-legend button { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink-75); transition: opacity 180ms var(--ease); }
+.ck-legend i { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+
+/* ============================================================
+   MOBILE BAR
+
+   Below 860px the rail is gone and navigation moves to a white bar at
+   the foot of the window, the same tiles in a row, with "More" opening
+   a sheet for the rest.
+   ============================================================ */
+
+.mobilebar {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 55;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 var(--ink-07);
+}
+.mobilebar__row { display: flex; gap: 2px; }
+.mobilebar .rail__item { flex: 1 1 0; min-width: 0; padding: 4px 0 2px; }
+.mobilebar .rail__label { font-size: 10.5px; }
+
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(36, 36, 38, 0.32);
+}
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 71;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
+  background: var(--card);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  box-shadow: var(--shadow-3);
+}
+.sheet__grip { width: 40px; height: 4px; margin: 4px auto 14px; border-radius: 4px; background: var(--ink-12); }
+.sheet__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.sheet__grid .rail__item { padding: 12px 4px; background: var(--pg); border-radius: var(--r-md); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1100px) {
+  .topbar__crumb { display: none; }
+}
+
+@media (max-width: 860px) {
+  .app-shell { --rail-w: 0px; --gutter: 16px; }
+  .rail { display: none; }
+  .mobilebar { display: block; }
+  .main-col { padding-bottom: 72px; }
+  .topbar { padding: 0 var(--gutter); gap: 10px; }
+  .app-shell .brand { font-size: 19px; }
+  .page { padding-top: 20px; }
+  .page-title { font-size: 25px; }
+  .page-head { align-items: flex-start; flex-direction: column; gap: 14px; }
+}
+
+@media (max-width: 760px) {
+  .topbar__search-wrap { display: none; }
+  .topbar__avatar-text { display: none; }
+  .topbar__avatar { padding: 3px; }
+  .topbar-meta .chip.optional { display: none; }
+  .topbar-meta { gap: 4px; }
+  .panel { padding: 16px; }
+  .tbl :is(th, td):first-child { padding-left: 16px; }
+  .tbl :is(th, td):last-child { padding-right: 16px; }
+  .stat__value { font-size: 28px; }
+}
+
+/* Phones: stat cards sit two to a row instead of one long column, so the
+   figures read as a set; text links get a finger-sized hit area. */
+@media (max-width: 560px) {
+  .stat { padding: 14px; }
+  .stat__top { flex-wrap: wrap; gap: 8px; }
+  .stat__icon { width: 30px; height: 30px; flex-basis: 30px; }
+  .stat__icon svg { width: 15px; height: 15px; }
+  .stat__value { margin-top: 6px; font-size: 23px; white-space: normal; overflow-wrap: anywhere; }
+  .stat__value small { font-size: 13px; }
+  .stat__foot { font-size: 12px; }
+  .link-btn { padding-block: 8px; margin-block: -4px; }
+}
+
+/* ============================================================
+   PRINT — the page and nothing else.
+   ============================================================ */
+
+@media print {
+  .rail, .topbar, .mobilebar, .no-print { display: none !important; }
+  .app-shell { padding-left: 0; background: #fff; }
+  .page { padding: 0; max-width: none; }
+}
