@@ -203,8 +203,27 @@ def test_mocked_and_imprecise_fixes_fail(db, tools, clock, make):
         "photo 1 was taken with a mocked location",
         "photo 4's GPS fix is too imprecise to place it on the site: accuracy 80 m, at most "
         "50 m is accepted",
-        "video 1 is 151.0 km outside the site, more than its GPS accuracy of 8 m",
+        "video 1 is about 151 km outside the site, more than its GPS accuracy of 8 m",
     )
+    rows = {row["item"]: row for row in result.details["captures"]}
+    assert rows["video 1"]["distance_m"] == 151_000
+
+
+@pytest.mark.parametrize(
+    ("off", "shown", "words"),
+    [
+        (22.2, 22.2, "22 m"),
+        (99.4, 99.4, "99 m"),
+        (100, 1_000, "less than 1 km"),
+        (640.33, 1_000, "less than 1 km"),
+        (2_354.4, 2_000, "about 2 km"),
+        (9_949, 10_000, "about 10 km"),
+    ],
+)
+def test_the_public_report_gives_far_off_site_distances_only_roughly(off, shown, words):
+    """The report is public and the site's outline too: an exact distance would put an
+    off-site photo, taken at home say, on a ring around the site."""
+    assert place._coarse(off) == (shown, words)
 
 
 # ---------------------------------------------------------------- 3: on time

@@ -56,9 +56,9 @@ def check(session: Session, evidence: Evidence, tools: Tools) -> Result:
             problems.append("the milestone has no site to check positions against")
             break
         if not within:
-            distance = _coarse(distance)
+            distance, far = _coarse(distance)
             problems.append(
-                f"{label} is {metres(distance)} outside the site, more than its GPS accuracy "
+                f"{label} is {far} outside the site, more than its GPS accuracy "
                 f"of {metres(accuracy)}"
             )
         placed.append({**row, "distance_m": round(distance, 1), "on_site": within})
@@ -69,15 +69,21 @@ def check(session: Session, evidence: Evidence, tools: Tools) -> Result:
     return Result(2, CheckStatus.PASSED, details=details)
 
 
-def _coarse(metres_off: float) -> float:
-    """An off-site distance as the public report gives it. Next to the site it is exact; from
-    a kilometre away it is rounded, to 100 m and beyond ten kilometres to a kilometre, so the
-    report and the site's public outline do not say where an off-site photo was taken, a
+COARSE_FROM_M = 100
+"""Closer than this, an off-site fix is the site's edge and a GPS slip, and is given exactly."""
+
+
+def _coarse(metres_off: float) -> tuple[float, str]:
+    """An off-site distance as the public report gives it, and in words. At the site's edge
+    it is exact; farther off it is only 'less than 1 km' or the nearest whole kilometre, so
+    the report and the site's public outline do not say where an off-site photo was taken, a
     home, say. The officer has the exact fix."""
+    if metres_off < COARSE_FROM_M:
+        return metres_off, metres(metres_off)
     if metres_off < 1_000:
-        return metres_off
-    step = 100 if metres_off < 10_000 else 1_000
-    return float(round(metres_off / step) * step)
+        return 1_000.0, "less than 1 km"
+    km = round(metres_off / 1_000)
+    return float(km * 1_000), f"about {km} km"
 
 
 def _distance(
