@@ -81,7 +81,11 @@ def test_pay_on_proof_charges_once_per_approval_and_funds_the_next_milestone(
     pledge = ok(
         client.post(f"/v1/projects/{project_id}/pledges", json=body, headers=pledger.headers), 201
     )
-    assert pledge["status"] == "active" and pledge["card_last4"] == "4242"
+    assert pledge["status"] == "active"
+    # The card's last digits answer the lost-phone card question, so they are never shown.
+    listed = ok(client.get("/v1/pledges", headers=pledger.headers))
+    assert [row["id"] for row in listed] == [pledge["id"]]
+    assert "4242" not in str(pledge) + str(listed)
 
     field_evidence.anchor(db, project_id)
     run(relayer, indexer, w3)

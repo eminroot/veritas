@@ -304,10 +304,12 @@ class PledgeIn(Input):
 
 
 class PledgeOut(Output):
+    """No card digits: the last four are the answer to the lost-phone card question
+    (decisions/recovery.py), and whoever holds the phone number can read this."""
+
     id: uuid.UUID
     project_id: uuid.UUID
     amount_qapik: int
-    card_last4: str | None
     status: str
 
 
